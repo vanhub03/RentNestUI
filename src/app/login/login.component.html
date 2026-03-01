@@ -1,0 +1,116 @@
+<div class="body">
+  <div class="auth-card">
+    <div class="auth-header">
+      <a routerLink="/" class="auth-brand" style="text-decoration: none">
+        <i class="fas fa-home"></i> RentNest
+      </a>
+      <h1 class="font-bold" style="font-size: 1.5rem; color: var(--text-main)">
+        Đăng nhập tài khoản
+      </h1>
+      <p class="text-muted m-0">Chào mừng trở lại! Vui lòng nhập thông tin.</p>
+    </div>
+
+    <div class="auth-body">
+      <form class="needs-validation" (ngSubmit)="onSubmit()" #loginForm="ngForm">
+        <div class="form-group">
+          <label class="form-label" for="username">Tên đăng nhập</label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            class="form-control"
+            [(ngModel)]="form.username"
+            placeholder="Nhập tên đăng nhập"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <label class="form-label m-0" for="password">Mật khẩu</label>
+            <a
+              routerLink="/forgot-password"
+              class="text-primary text-sm font-medium"
+              style="font-size: 0.85rem; text-decoration: none"
+              >Quên mật khẩu?</a
+            >
+          </div>
+          <div class="password-input-wrapper" style="position: relative">
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              id="password"
+              name="password"
+              class="form-control"
+              [(ngModel)]="form.password"
+              placeholder="••••••••"
+              required
+            />
+            <i
+              class="fas password-toggle"
+              [ngClass]="showPassword ? 'fa-eye-slash' : 'fa-eye'"
+              style="
+                position: absolute;
+                right: 10px;
+                top: 50%;
+                transform: translateY(-50%);
+                cursor: pointer;
+              "
+              (click)="togglePassword()"
+            ></i>
+          </div>
+        </div>
+
+        <div class="form-group d-flex justify-content-between align-items-center">
+          <label
+            class="checkbox-label m-0"
+            style="display: flex; gap: 0.5rem; align-items: center; cursor: pointer"
+          >
+            <input type="checkbox" name="rememberMe" [(ngModel)]="form.rememberMe" /> Ghi nhớ đăng
+            nhập
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg mt-4">Đăng nhập</button>
+
+        <div class="divider" style="text-align: center; margin: 20px 0; color: #888">Hoặc</div>
+
+        <button
+          type="button"
+          class="btn btn-outline btn-block mb-3"
+          style="
+            color: #db4437;
+            border-color: #ddd;
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            background: white;
+            margin-bottom: 10px;
+          "
+        >
+          <i class="fab fa-google"></i> Đăng nhập với Google
+        </button>
+        <button
+          type="button"
+          class="btn btn-outline btn-block"
+          style="
+            color: #4267b2;
+            border-color: #ddd;
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            background: white;
+          "
+        >
+          <i class="fab fa-facebook"></i> Đăng nhập với Facebook
+        </button>
+
+        <div class="text-center mt-4 text-sm text-muted" style="margin-top: 20px">
+          Chưa có tài khoản?
+          <a routerLink="/register" class="font-semibold text-primary" style="text-decoration: none"
+            >Đăng ký ngay</a
+          >
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
