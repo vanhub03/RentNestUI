@@ -1,0 +1,59 @@
+.body {
+  background-color: var(--bg-alt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem 0;
+}
+
+.auth-card {
+  background: var(--bg-surface);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  width: 100%;
+  max-width: 550px;
+  overflow: hidden;
+  animation: slideUp 0.5s ease-out;
+}
+
+.role-selector {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.role-option {
+  flex: 1;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.role-option:hover {
+  border-color: var(--primary-light);
+  background-color: rgba(15, 82, 186, 0.02);
+}
+
+.role-option.active {
+  border-color: var(--primary);
+  background-color: rgba(15, 82, 186, 0.05);
+  color: var(--primary);
+}
+
+.role-option i {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-muted);
+}
+
+.role-option.active i {
+  color: var(--primary);
+}
+
+.auth-body {
+  padding: 1.5rem 2.5rem 2.5rem;
+}

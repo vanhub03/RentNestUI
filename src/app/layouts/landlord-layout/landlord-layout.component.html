@@ -1,0 +1,46 @@
+<div class="admin-layout">
+  <aside class="sidebar" [class.active]="isSidebarOpen">
+    <div class="sidebar-header"><i class="fas fa-home text-primary"></i> RentNest Landlord</div>
+    <nav class="sidebar-nav">
+      <div class="px-3 mb-2 text-xs font-semibold text-muted text-uppercase tracking-wider">
+        Tổng quan
+      </div>
+      <a routerLink="/landlord/dashboard" routerLinkActive="active" class="sidebar-link">
+        <i class="fas fa-chart-line"></i> Dashboard
+      </a>
+
+      <div class="px-3 mt-4 mb-2 text-xs font-semibold text-muted text-uppercase tracking-wider">
+        Quản lý Dữ liệu
+      </div>
+      <a routerLink="/landlord/rooms" routerLinkActive="active" class="sidebar-link">
+        <i class="fas fa-door-open"></i> Phòng & Giường
+      </a>
+      <a routerLink="/landlord/tenants" routerLinkActive="active" class="sidebar-link">
+        <i class="fas fa-users"></i> Khách Thuê
+      </a>
+      <a routerLink="/landlord/contracts" routerLinkActive="active" class="sidebar-link">
+        <i class="fas fa-file-signature"></i> Hợp Đồng
+      </a>
+    </nav>
+  </aside>
+
+  <main class="admin-main">
+    <header class="admin-header">
+      <div class="d-flex align-items-center gap-3">
+        <button class="btn btn-icon d-lg-none" (click)="toggleSidebar()">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+      <div class="d-flex align-items-center gap-3">
+        <span class="font-semibold text-muted"
+          ><i class="fas fa-user-circle"></i> {{ username }}</span
+        >
+        <button class="btn btn-outline btn-sm text-danger" (click)="logout()">
+          <i class="fas fa-sign-out-alt"></i> Đăng xuất
+        </button>
+      </div>
+    </header>
+
+    <router-outlet></router-outlet>
+  </main>
+</div>

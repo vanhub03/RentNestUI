@@ -1,0 +1,365 @@
+<div class="admin-content">
+  <div class="mb-4 d-flex justify-content-between align-items-center">
+    <h2 class="m-0 font-bold" style="font-size: 1.5rem">Quản lý Phòng & Giường</h2>
+  </div>
+
+  <div class="card p-0 mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+      <div class="d-flex gap-3">
+        <select
+          class="form-control form-control-sm"
+          style="width: 200px"
+          [(ngModel)]="filter.hostelId"
+          (change)="onFilterChange()"
+        >
+          <option value="">Tất cả cơ sở</option>
+          <option value="1">Cơ sở Xuân Thủy</option>
+          <option value="2">Cơ sở Cầu Giấy</option>
+        </select>
+        <select
+          class="form-control form-control-sm"
+          style="width: 150px"
+          [(ngModel)]="filter.status"
+          (change)="onFilterChange()"
+        >
+          <option value="">Tất cả trạng thái</option>
+          <option value="AVAILABLE">Phòng trống</option>
+          <option value="RENTED">Đang thuê</option>
+          <option value="MAINTENANCE">Đang sửa chữa</option>
+        </select>
+        <input
+          type="text"
+          class="form-control form-control-sm"
+          placeholder="Tìm tên phòng..."
+          style="width: 200px"
+          [(ngModel)]="filter.keyword"
+          (keyup.enter)="onFilterChange()"
+        />
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-outline" (click)="openHostelModal()">
+          <i class="fas fa-building"></i> Thêm Tòa Nhà
+        </button>
+        <button class="btn btn-primary" (click)="openRoomModal()">
+          <i class="fas fa-plus"></i> Thêm Phòng
+        </button>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Cơ Sở</th>
+            <th>Tên Phòng</th>
+            <th>Loại Phòng</th>
+            <th>Giá Thuê</th>
+            <th>Diện tích</th>
+            <th>Trạng Thái</th>
+            <th class="text-right">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of rooms; track r.id) {
+            <tr>
+              <td>{{ r.location || 'Chưa cập nhật' }}</td>
+              <td class="font-medium text-primary">{{ r.title }}</td>
+              <td>{{ r.roomType || 'Chưa cập nhật' }}</td>
+              <td>{{ r.price | currency: 'VND' : '' }}đ</td>
+              <td>{{ r.area }}m²</td>
+              <td>
+                <span
+                  class="badge"
+                  [ngClass]="{
+                    'badge-info': r.status === 'AVAILABLE',
+                    'badge-success': r.status === 'RENTED',
+                    'badge-danger': r.status === 'MAINTENANCE',
+                  }"
+                >
+                  {{
+                    r.status === 'AVAILABLE'
+                      ? 'Trống'
+                      : r.status === 'RENTED'
+                        ? 'Đang thuê'
+                        : 'Sửa chữa'
+                  }}
+                </span>
+              </td>
+              <td class="text-right">
+                <button class="btn btn-sm btn-outline"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-sm btn-outline text-danger" style="margin-left: 0.5rem">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="7" class="text-center py-4 text-muted">Chưa có dữ liệu phòng.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card-footer d-flex justify-content-between align-items-center bg-transparent">
+      <span class="text-sm text-muted"
+        >Hiển thị trang {{ filter.page + 1 }} / {{ totalPages || 1 }} (Tổng:
+        {{ totalElements }} phòng)</span
+      >
+      <ul class="pagination m-0">
+        <li class="page-item" [class.disabled]="filter.page === 0">
+          <a class="page-link" (click)="changePage(filter.page - 1)"
+            ><i class="fas fa-chevron-left"></i
+          ></a>
+        </li>
+        <li class="page-item active">
+          <a class="page-link">{{ filter.page + 1 }}</a>
+        </li>
+        <li class="page-item" [class.disabled]="filter.page >= totalPages - 1 || totalPages === 0">
+          <a class="page-link" (click)="changePage(filter.page + 1)"
+            ><i class="fas fa-chevron-right"></i
+          ></a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div
+  class="modal-overlay"
+  [class.active]="isHostelModalOpen"
+  (click)="$event.target === $event.currentTarget && closeHostelModal()"
+>
+  <div class="modal" style="max-width: 800px">
+    <div class="modal-header">
+      <h3 class="modal-title">Thêm Tòa Nhà / Cơ Sở Mới</h3>
+      <button class="modal-close" (click)="closeHostelModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form class="needs-validation" (ngSubmit)="onSubmitHostel()">
+        <div class="form-group mb-3">
+          <label class="form-label">Tên Tòa Nhà (Bắt buộc)</label>
+          <input
+            type="text"
+            class="form-control"
+            name="name"
+            [(ngModel)]="newHostel.name"
+            placeholder="VD: RentNest Complex Cầu Giấy"
+            required
+          />
+        </div>
+
+        <div class="d-grid grid-cols-3 gap-3 mb-3">
+          <div class="form-group">
+            <label class="form-label">Tỉnh / Thành phố</label>
+            <select class="form-control" name="cityCode" [(ngModel)]="newHostel.cityCode" required>
+              <option value="">-- Chọn Tỉnh/TP --</option>
+              <option value="01">Hà Nội</option>
+              <option value="79">Hồ Chí Minh</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Quận / Huyện</label>
+            <select
+              class="form-control"
+              name="districtCode"
+              [(ngModel)]="newHostel.districtCode"
+              required
+            >
+              <option value="">-- Chọn Quận/Huyện --</option>
+              <option value="001">Ba Đình</option>
+              <option value="002">Hoàn Kiếm</option>
+              <option value="005">Cầu Giấy</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phường / Xã</label>
+            <select class="form-control" name="wardCode" [(ngModel)]="newHostel.wardCode" required>
+              <option value="">-- Chọn Phường/Xã --</option>
+              <option value="0001">Phúc Xá</option>
+              <option value="0124">Dịch Vọng</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group mb-3">
+          <label class="form-label">Số nhà, Tên đường (Chi tiết)</label>
+          <input
+            type="text"
+            class="form-control"
+            name="addressDetail"
+            [(ngModel)]="newHostel.addressDetail"
+            placeholder="VD: Số 10, Ngõ 20, Đường Xuân Thủy"
+            required
+          />
+        </div>
+
+        <div class="form-group mb-3">
+          <label class="form-label">Mô tả chung</label>
+          <textarea
+            class="form-control"
+            name="description"
+            [(ngModel)]="newHostel.description"
+            rows="3"
+            placeholder="Mô tả về khu trọ, vị trí, an ninh..."
+          ></textarea>
+        </div>
+
+        <div class="form-group mb-4">
+          <label class="form-label d-flex justify-content-between">
+            <span>Upload Ảnh Tòa Nhà (Nhiều ảnh)</span>
+            <span class="text-xs text-muted">Hỗ trợ JPG, PNG (Tối đa 5MB/ảnh)</span>
+          </label>
+          <div
+            class="p-4 text-center cursor-pointer"
+            style="border: 2px dashed var(--border-color); background: var(--bg-alt)"
+          >
+            <i class="fas fa-cloud-upload-alt text-3xl text-muted mb-2"></i>
+            <p class="m-0 font-medium">Kéo thả hoặc Click để tải ảnh lên</p>
+          </div>
+          <div class="d-flex gap-2 mt-3 pb-2">
+            <div style="width: 80px; height: 80px; border-radius: 8px; overflow: hidden">
+              <img
+                src="https://images.unsplash.com/photo-1554995207-c18c203602cb"
+                style="width: 100%; height: 100%; object-fit: cover"
+              />
+              <div
+                class="position-absolute top-0 right-0 bg-danger text-white d-flex align-items-center justify-content-center"
+                style="width: 20px; height: 20px; border-bottom-left-radius: 4px; cursor: pointer"
+              >
+                <i class="fas fa-times text-xs"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer p-0 border-0 mt-4 d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-outline" (click)="closeHostelModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i> Lưu Cơ Sở
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div
+  class="modal-overlay"
+  [class.active]="isRoomModalOpen"
+  (click)="$event.target === $event.currentTarget && closeRoomModal()"
+>
+  <div class="modal" style="max-width: 800px">
+    <div class="modal-header">
+      <h3 class="modal-title">Thêm Phòng Mới</h3>
+      <button class="modal-close" (click)="closeRoomModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form class="needs-validation" (ngSubmit)="onSubmitRoom()">
+        <div class="d-grid grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="form-label">Thuộc Tòa nhà / Cơ sở</label>
+            <select class="form-control" name="hostelId" [(ngModel)]="newRoom.hostelId" required>
+              <option value="">-- Chọn cơ sở --</option>
+              <option value="1">Cơ Sở Xuân Thủy</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tên/Mã phòng</label>
+            <input
+              type="text"
+              class="form-control"
+              name="roomName"
+              [(ngModel)]="newRoom.roomName"
+              placeholder="VD: P.101"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Giá thuê (VNĐ/tháng)</label>
+            <input
+              type="number"
+              class="form-control"
+              name="basePrice"
+              [(ngModel)]="newRoom.basePrice"
+              placeholder="VD: 4500000"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Diện tích (m²)</label>
+            <input
+              type="number"
+              step="0.1"
+              class="form-control"
+              name="area"
+              [(ngModel)]="newRoom.area"
+              placeholder="VD: 25.5"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Tầng Số (Floor)</label>
+            <input
+              type="number"
+              class="form-control"
+              name="floor"
+              [(ngModel)]="newRoom.floor"
+              placeholder="VD: 1"
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Số phòng tắm (WC)</label>
+            <input
+              type="number"
+              class="form-control"
+              name="bathCount"
+              [(ngModel)]="newRoom.bathCount"
+              placeholder="VD: 1"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Loại Giường (Bed Type)</label>
+            <select class="form-control" name="bedType" [(ngModel)]="newRoom.bedType">
+              <option value="Không có giường">Không có giường</option>
+              <option value="Giường đơn (1m2)">Giường đơn (1m2)</option>
+              <option value="Giường đôi (1m6)">Giường đôi (1m6)</option>
+              <option value="Giường tầng">Giường tầng</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Trạng thái phòng</label>
+            <select class="form-control" name="status" [(ngModel)]="newRoom.status">
+              <option value="AVAILABLE">Phòng trống</option>
+              <option value="RENTED">Đang cho thuê</option>
+              <option value="MAINTENANCE">Đang sửa chữa</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group mt-4 mb-2">
+          <label class="form-label d-flex justify-content-between">
+            <span>Upload Ảnh Chi Tiết Phòng (Nhiều ảnh)</span>
+          </label>
+          <div
+            class="upload-zone border-dashed rounded-lg p-4 text-center cursor-pointer"
+            style="border: 2px dashed var(--border-color); background: var(--bg-alt)"
+          >
+            <i class="fas fa-images text-3xl text-muted mb-2"></i>
+            <p class="m-0 font-medium text-sm">Chọn nhiều file ảnh hoặc kéo thả vào đây</p>
+          </div>
+        </div>
+
+        <div class="modal-footer p-0 border-0 mt-4 d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-outline" (click)="closeRoomModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i> Lưu Phòng
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,141 @@
+<div class="body">
+  <div class="auth-card">
+    <div class="text-center pt-4 pb-2">
+      <a routerLink="/" class="font-bold text-primary" style="font-size: 1.5rem">
+        <i class="fas fa-home"></i> RentNest
+      </a>
+      <h1 class="font-bold mt-2" style="font-size: 1.5rem">Tạo tài khoản mới</h1>
+    </div>
+
+    <div class="auth-body">
+      <form class="needs-validation" (ngSubmit)="onSubmit()" #registerForm="ngForm">
+        <label class="form-label text-center mb-3">Bạn là ai?</label>
+        <div class="role-selector">
+          <div
+            class="role-option"
+            [class.active]="form.role === 'TENANT'"
+            (click)="setRole('TENANT')"
+          >
+            <i class="fas fa-user"></i>
+            <div class="font-semibold">Người tìm phòng</div>
+          </div>
+          <div
+            class="role-option"
+            [class.active]="form.role === 'LANDLORD'"
+            (click)="setRole('LANDLORD')"
+          >
+            <i class="fas fa-building"></i>
+            <div class="font-semibold">Chủ nhà trọ</div>
+          </div>
+        </div>
+
+        <div class="d-grid grid-cols-2 gap-3 mb-3">
+          <div class="form-group mb-0">
+            <label class="form-label">Tên đăng nhập (Username)</label>
+            <input
+              type="text"
+              class="form-control"
+              name="username"
+              [(ngModel)]="form.username"
+              placeholder="nguyenvana123"
+              required
+            />
+          </div>
+          <div class="form-group mb-0">
+            <label class="form-label">Họ và Tên</label>
+            <input
+              type="text"
+              class="form-control"
+              name="fullname"
+              [(ngModel)]="form.fullname"
+              placeholder="Nguyễn Văn A"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="d-grid grid-cols-2 gap-3 mb-3">
+          <div class="form-group mb-0">
+            <label class="form-label">Email</label>
+            <input
+              type="email"
+              class="form-control"
+              name="email"
+              [(ngModel)]="form.email"
+              placeholder="example@mail.com"
+              required
+            />
+          </div>
+          <div class="form-group mb-0">
+            <label class="form-label">Số điện thoại</label>
+            <input
+              type="tel"
+              class="form-control"
+              name="phoneNumber"
+              [(ngModel)]="form.phoneNumber"
+              placeholder="0987..."
+              required
+            />
+          </div>
+        </div>
+
+        <div class="d-grid grid-cols-2 gap-3">
+          <div class="form-group">
+            <label class="form-label">Mật khẩu</label>
+            <input
+              type="password"
+              class="form-control"
+              name="password"
+              [(ngModel)]="form.password"
+              placeholder="Tối thiểu 8 ký tự"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Xác nhận mật khẩu</label>
+            <input
+              type="password"
+              class="form-control"
+              name="confirmPassword"
+              [(ngModel)]="form.confirmPassword"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="form-group mt-4">
+          <label
+            style="
+              display: flex;
+              gap: 0.5rem;
+              align-items: flex-start;
+              cursor: pointer;
+              font-size: 0.875rem;
+            "
+          >
+            <input
+              type="checkbox"
+              name="agreeTerms"
+              [(ngModel)]="form.agreeTerms"
+              required
+              style="margin-top: 0.25rem"
+            />
+            <span class="text-muted"
+              >Tôi đồng ý với <a href="#" class="text-primary font-medium">Điều khoản dịch vụ</a> và
+              <a href="#" class="text-primary font-medium">Chính sách bảo mật</a> của
+              RentNest.</span
+            >
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg mt-4">
+          Đăng ký tài khoản
+        </button>
+
+        <div class="text-center mt-4 text-sm text-muted">
+          Đã có tài khoản? <a routerLink="/login" class="font-semibold text-primary">Đăng nhập</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
