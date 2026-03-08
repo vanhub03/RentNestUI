@@ -1,5 +1,4 @@
 /* You can add global styles to this file, and also import other style files */
-/* You can add global styles to this file, and also import other style files */
 @use 'ngx-toastr/toastr';
 // @use '../public/css/global.css';
 // @use '../public/css/components.css';
@@ -811,6 +810,8 @@ select.form-control {
     opacity var(--transition-normal),
     visibility var(--transition-normal);
   backdrop-filter: blur(2px);
+  padding: 1.5rem;
+  overflow-y: auto;
 }
 
 .modal-overlay.active {
@@ -823,9 +824,13 @@ select.form-control {
   border-radius: var(--radius-lg);
   width: 100%;
   max-width: 500px;
+  max-height: calc(100vh - 3rem);
   box-shadow: var(--shadow-xl);
   transform: scale(0.95) translateY(20px);
   transition: transform var(--transition-normal);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .modal-overlay.active .modal {
@@ -860,6 +865,8 @@ select.form-control {
 
 .modal-body {
   padding: 1.5rem;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
 }
 
 .modal-footer {

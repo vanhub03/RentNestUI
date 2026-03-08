@@ -10,4 +10,7 @@ export class RoomService {
   getLandlordHostels(params: any): Observable<any> {
     return this.http.get(enviroment.apiUrl + '/landlord/hostels', { params });
   }
+  getLandlordRooms(params: any): Observable<any> {
+    return this.http.get(enviroment.apiUrl + '/landlord/rooms', { params });
+  }
 }
