@@ -18,4 +18,9 @@ export class RoomService {
       responseType: 'text',
     });
   }
+  createHostel(data: FormData): Observable<any> {
+    return this.http.post(enviroment.apiUrl + '/hostels', data, {
+      responseType: 'text',
+    });
+  }
 }

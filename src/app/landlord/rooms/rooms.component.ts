@@ -414,5 +414,37 @@ export class LandLordRoomsComponent implements OnInit {
       },
     });
   }
-  onSubmitHostel() {}
+  onSubmitHostel() {
+    if (this.isSubmittingHostel) {
+      return;
+    }
+    if (this.selectedFiles.length === 0) {
+      this.toastr.warning('Vui lòng chọn ít nhất 1 ảnh cho tòa nhà');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('hostels', JSON.stringify(this.newHostel));
+    for (const file of this.selectedFiles) {
+      formData.append('images', file);
+    }
+    this.isSubmittingHostel = true;
+    this.cdr.detectChanges();
+    this.roomService.createHostel(formData).subscribe({
+      next: (res) => {
+        this.isSubmittingHostel = false;
+        this.toastr.success('Thêm tòa nhà thành công!');
+        this.closeHostelModal();
+        this.loadHostelOptions();
+        this.loadHostels();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.isSubmittingHostel = false;
+        console.error('Lỗi: ', err);
+        this.toastr.error('Có lỗi xảy ra khi thêm tòa nhà');
+        this.cdr.detectChanges();
+      },
+    });
+  }
 }
