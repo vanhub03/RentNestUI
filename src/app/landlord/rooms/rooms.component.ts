@@ -102,8 +102,7 @@ export class LandLordRoomsComponent implements OnInit {
     this.roomSelectedFiles = [];
     this.roomImagePreviews = [];
   }
-  onSubmitRoom() {}
-  onSubmitHostel() {}
+
   onRoomOverlayClick(event: MouseEvent): void {
     if (event.target === event.currentTarget) {
       this.closeRoomModal();
@@ -361,4 +360,59 @@ export class LandLordRoomsComponent implements OnInit {
     this.selectedFiles = [];
     this.imagePreviews = [];
   }
+
+  onSubmitRoom() {
+    if (this.isSubmittingRoom) {
+      return;
+    }
+    if (this.roomSelectedFiles.length === 0) {
+      this.toastr.warning('Vui lòng upload ít nhất 1 ảnh phòng!');
+      return;
+    }
+    const roomPayload = {
+      hostelId: this.newRoom.hostelId,
+      roomName: this.newRoom.roomName?.trim(),
+      basePrice:
+        this.newRoom.basePrice === null || this.newRoom.basePrice === ''
+          ? null
+          : Number(this.newRoom.basePrice),
+      area:
+        this.newRoom.area === null || this.newRoom.area === '' ? null : Number(this.newRoom.area),
+      floor:
+        this.newRoom.floor === null || this.newRoom.floor === ''
+          ? null
+          : Number(this.newRoom.floor),
+      bathCount:
+        this.newRoom.bathCount === null || this.newRoom.bathCount === ''
+          ? null
+          : Number(this.newRoom.bathCount),
+      bedType: this.newRoom.bedType,
+      status: this.newRoom.status,
+    };
+    const formData = new FormData();
+    formData.append('rooms', JSON.stringify(roomPayload));
+
+    for (const file of this.roomSelectedFiles) {
+      formData.append('images', file);
+    }
+
+    this.isSubmittingRoom = true;
+    this.cdr.detectChanges();
+    this.roomService.createRoom(formData).subscribe({
+      next: () => {
+        this.isSubmittingRoom = false;
+        this.toastr.success('Thêm phòng thành công');
+        this.closeRoomModal();
+        this.loadRooms();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.isSubmittingRoom = false;
+        console.error('Thêm phòng lỗi:', err);
+        this.toastr.error('Có lỗi xảy ra khi thêm phòng');
+        this.cdr.detectChanges();
+      },
+    });
+  }
+  onSubmitHostel() {}
 }
