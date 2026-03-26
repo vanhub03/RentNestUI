@@ -116,8 +116,14 @@
                   </span>
                 </td>
                 <td class="text-right">
-                  <button class="btn btn-sm btn-outline"><i class="fas fa-edit"></i></button>
-                  <button class="btn btn-sm btn-outline text-danger" style="margin-left: 0.5rem">
+                  <button class="btn btn-sm btn-outline" (click)="openEditRoomModal(r)">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button
+                    class="btn btn-sm btn-outline text-danger"
+                    style="margin-left: 0.5rem"
+                    (click)="deleteRoom(r.id)"
+                  >
                     <i class="fas fa-trash"></i>
                   </button>
                 </td>
@@ -434,7 +440,9 @@
 <div class="modal-overlay" [class.active]="isRoomModalOpen" (click)="onRoomOverlayClick($event)">
   <div class="modal" style="max-width: 800px">
     <div class="modal-header">
-      <h3 class="modal-title">Thêm Phòng Mới</h3>
+      <h3 class="modal-title">
+        {{ isEditModeRoom ? 'Cập nhật thông tin phòng' : 'Thêm Phòng Mới' }}
+      </h3>
       <button class="modal-close" [disabled]="isSubmittingRoom" (click)="closeRoomModal()">
         &times;
       </button>
@@ -448,7 +456,7 @@
               class="form-control"
               name="hostelId"
               [(ngModel)]="newRoom.hostelId"
-              [disabled]="hostelOptionsLoading || isSubmittingRoom"
+              [disabled]="hostelOptionsLoading || isSubmittingRoom || isEditModeRoom"
               required
             >
               <option value="">-- Chọn cơ sở --</option>
@@ -583,7 +591,7 @@
           <button type="submit" class="btn btn-primary" [disabled]="isSubmittingRoom">
             <span class="btn-loader" *ngIf="isSubmittingRoom"></span>
             <i class="fas fa-save" *ngIf="!isSubmittingRoom"></i>
-            {{ isSubmittingRoom ? 'Dang luu...' : 'Lưu Phòng' }}
+            {{ isSubmittingRoom ? 'Đang lưu...' : isEditModeRoom ? 'Cập nhật phòng' : 'Lưu Phòng' }}
           </button>
         </div>
       </form>

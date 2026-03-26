@@ -69,6 +69,7 @@ export class LandLordRoomsComponent implements OnInit {
   isRoomModalOpen = false;
   isSubmittingRoom = false;
   newRoom: any = {
+    id: 0,
     hostelId: '',
     roomName: '',
     basePrice: null,
@@ -81,7 +82,10 @@ export class LandLordRoomsComponent implements OnInit {
   roomBasePriceDisplay = '';
   roomImagePreviews: string[] = [];
   roomSelectedFiles: File[] = [];
+  isEditModeRoom: boolean = false;
+
   openRoomModal() {
+    this.isEditModeRoom = false;
     this.isRoomModalOpen = true;
     this.isSubmittingRoom = false;
     this.newRoom = {
@@ -125,6 +129,9 @@ export class LandLordRoomsComponent implements OnInit {
     input.value = '';
   }
   onRoomFileSelected(event: Event): void {
+    if (this.isEditModeRoom && this.roomSelectedFiles.length == 0) {
+      this.roomImagePreviews = [];
+    }
     const input = event.target as HTMLInputElement;
     const files = Array.from(input.files ?? []);
     if (files.length) {
@@ -365,7 +372,7 @@ export class LandLordRoomsComponent implements OnInit {
     if (this.isSubmittingRoom) {
       return;
     }
-    if (this.roomSelectedFiles.length === 0) {
+    if (this.roomSelectedFiles.length === 0 && !this.isEditModeRoom) {
       this.toastr.warning('Vui lòng upload ít nhất 1 ảnh phòng!');
       return;
     }
@@ -391,28 +398,47 @@ export class LandLordRoomsComponent implements OnInit {
     };
     const formData = new FormData();
     formData.append('rooms', JSON.stringify(roomPayload));
-
-    for (const file of this.roomSelectedFiles) {
-      formData.append('images', file);
+    if (this.roomSelectedFiles.length > 0) {
+      for (const file of this.roomSelectedFiles) {
+        formData.append('images', file);
+      }
     }
 
     this.isSubmittingRoom = true;
     this.cdr.detectChanges();
-    this.roomService.createRoom(formData).subscribe({
-      next: () => {
-        this.isSubmittingRoom = false;
-        this.toastr.success('Thêm phòng thành công');
-        this.closeRoomModal();
-        this.loadRooms();
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        this.isSubmittingRoom = false;
-        console.error('Thêm phòng lỗi:', err);
-        this.toastr.error('Có lỗi xảy ra khi thêm phòng');
-        this.cdr.detectChanges();
-      },
-    });
+    if (this.isEditModeRoom) {
+      this.roomService.updateRoom(this.newRoom.id, formData).subscribe({
+        next: () => {
+          this.isSubmittingRoom = false;
+          this.toastr.success('Cập nhật phòng thành công');
+          this.closeRoomModal();
+          this.loadRooms();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.isSubmittingRoom = false;
+          console.error('Thêm phòng lỗi:', err);
+          this.toastr.error('Có lỗi xảy ra khi update phòng');
+          this.cdr.detectChanges();
+        },
+      });
+    } else {
+      this.roomService.createRoom(formData).subscribe({
+        next: () => {
+          this.isSubmittingRoom = false;
+          this.toastr.success('Thêm phòng thành công');
+          this.closeRoomModal();
+          this.loadRooms();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.isSubmittingRoom = false;
+          console.error('Thêm phòng lỗi:', err);
+          this.toastr.error('Có lỗi xảy ra khi thêm phòng');
+          this.cdr.detectChanges();
+        },
+      });
+    }
   }
   onSubmitHostel() {
     if (this.isSubmittingHostel) {
@@ -446,5 +472,42 @@ export class LandLordRoomsComponent implements OnInit {
         this.cdr.detectChanges();
       },
     });
+  }
+  openEditRoomModal(room: any) {
+    this.isEditModeRoom = true;
+    let mappedHostelId = room.hostelId;
+    if (!mappedHostelId && room.location) {
+      const foundHostel = this.hostelOptions.find((t) => t.name == room.location);
+      if (foundHostel) mappedHostelId = foundHostel.id;
+    }
+
+    this.newRoom = {
+      id: room.id,
+      hostelId: mappedHostelId,
+      roomName: room.title,
+      basePrice: room.price,
+      area: room.area,
+      floor: room.floor,
+      bathCount: room.bathCount,
+      bedType: room.bedType,
+      status: room.status || 'AVAILABLE',
+    };
+    this.roomImagePreviews = room.images;
+    this.roomBasePriceDisplay = this.newRoom.basePrice
+      ? new Intl.NumberFormat('en-US').format(this.newRoom.basePrice)
+      : '';
+    this.isRoomModalOpen = true;
+  }
+
+  deleteRoom(id: number) {
+    if (confirm('Bạn có chắc chắn muốn xóa phòng này không?')) {
+      this.roomService.deleteRoom(id).subscribe({
+        next: () => {
+          this.toastr.success('Xóa thành công!');
+          this.loadRooms();
+        },
+        error: (err) => this.toastr.error('Lỗi xảy ra khi xóa!'),
+      });
+    }
   }
 }
