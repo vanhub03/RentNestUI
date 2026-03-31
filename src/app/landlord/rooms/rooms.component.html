@@ -223,8 +223,14 @@
                   <td>{{ hostel.imageCount ?? 0 }}</td>
                   <td class="hostel-description">{{ hostel.description || 'Chưa có mô tả' }}</td>
                   <td class="text-right">
-                    <button class="btn btn-sm btn-outline"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-sm btn-outline text-danger" style="margin-left: 0.5rem">
+                    <button class="btn btn-sm btn-outline" (click)="openEditHostelModal(hostel)">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button
+                      class="btn btn-sm btn-outline text-danger"
+                      (click)="deleteHostel(hostel.id)"
+                      style="margin-left: 0.5rem"
+                    >
                       <i class="fas fa-trash"></i>
                     </button>
                   </td>
@@ -319,7 +325,7 @@
             </select>
           </div>
 
-          <div class="form-group">
+          <!-- <div class="form-group">
             <label class="form-label">Quận / Huyện</label>
             <select
               class="form-control"
@@ -335,7 +341,7 @@
               }
             </select>
             <div class="form-help" *ngIf="isDistrictLoading">Dang tai Quan/Huyen...</div>
-          </div>
+          </div> -->
 
           <div class="form-group">
             <label class="form-label">Phường / Xã</label>
@@ -344,7 +350,7 @@
               name="wardCode"
               [(ngModel)]="newHostel.wardCode"
               (change)="onWardChange()"
-              [disabled]="!newHostel.districtCode"
+              [disabled]="!newHostel.cityCode"
               required
             >
               <option value="">-- Chọn Phường/Xã --</option>

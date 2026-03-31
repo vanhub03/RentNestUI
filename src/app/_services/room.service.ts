@@ -30,4 +30,16 @@ export class RoomService {
   deleteRoom(id: number): Observable<any> {
     return this.http.delete(enviroment.apiUrl + `/rooms/${id}`);
   }
+  updateHostel(id: number, hostel: FormData): Observable<any> {
+    return this.http.put(enviroment.apiUrl + `/hostels/${id}`, hostel);
+  }
+  deleteHostel(id: number): Observable<any> {
+    return this.http.delete(enviroment.apiUrl + `/hostels/${id}`);
+  }
+  getLatestRooms(): Observable<any> {
+    return this.http.get(enviroment.apiUrl + '/public/latest-rooms');
+  }
+  getAvailableLocations(): Observable<string[]> {
+    return this.http.get<string[]>(enviroment.apiUrl + '/public/locations');
+  }
 }

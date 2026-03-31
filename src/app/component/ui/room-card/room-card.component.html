@@ -1,0 +1,53 @@
+<div class="card room-card text-left" *ngIf="room">
+  <div class="badge-overlay">
+    <span
+      class="badge"
+      [ngClass]="{
+        'badge-success': room.status === 'AVAILABLE',
+        'badge-warning': room.status === 'MAINTENANCE',
+        'badge-danger': room.status === 'RENTED',
+      }"
+    >
+      {{
+        room.status === 'AVAILABLE' ? 'Còn trống' : room.status === 'RENTED' ? 'Đã thuê' : 'Bảo trì'
+      }}
+    </span>
+  </div>
+  <div class="card-img-container">
+    <img
+      [src]="
+        room.thumbnail ||
+        'https://images.unsplash.com/photo-1555541170-1361cddf01d0?w=600&auto=format&fit=crop&q=60'
+      "
+      [alt]="room.title"
+      class="card-img"
+    />
+  </div>
+  <div class="card-body p-3 flex flex-col">
+    <div class="text-muted mb-1" style="font-size: 0.8rem">
+      <i class="fas fa-map-marker-alt"></i> {{ room.location }}
+    </div>
+
+    <h4
+      class="font-semibold mb-2 line-clamp-2"
+      style="font-size: 1.1rem; min-height: 2.8rem; cursor: pointer"
+      [routerLink]="['/room', room.id]"
+    >
+      {{ room.title }}
+    </h4>
+
+    <div class="text-primary font-bold mb-3" style="font-size: 1.25rem">
+      {{ room.price | number: '1.0-0' }}đ
+      <span class="text-muted" style="font-size: 0.8rem; font-weight: normal">/tháng</span>
+    </div>
+
+    <div
+      class="d-flex justify-content-between text-muted mt-auto"
+      style="font-size: 0.85rem; border-top: 1px solid var(--border-color); padding-top: 0.75rem"
+    >
+      <span><i class="fas fa-vector-square"></i> {{ room.area }}m²</span>
+      <span><i class="fas fa-bed"></i> {{ room.bedType }}</span>
+      <span><i class="fas fa-bath"></i> {{ room.bathCount }} WC</span>
+    </div>
+  </div>
+</div>

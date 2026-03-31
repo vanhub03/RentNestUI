@@ -1,0 +1,76 @@
+<header class="navbar">
+  <div class="container d-flex justify-content-between align-items-center">
+    <a routerLink="/" class="navbar-brand"> <i class="fas fa-home"></i> RentNest </a>
+
+    <button class="hamburger" (click)="toggleMenu()">
+      <i class="fas fa-bars"></i>
+    </button>
+
+    <nav class="navbar-menu d-flex align-items-center" [class.active]="isMenuOpen">
+      <ul class="navbar-nav">
+        <li>
+          <a
+            routerLink="/"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="nav-link"
+            (click)="isMenuOpen = false"
+            >Trang chủ</a
+          >
+        </li>
+        <li>
+          <a
+            routerLink="/rooms"
+            routerLinkActive="active"
+            class="nav-link"
+            (click)="isMenuOpen = false"
+            >Xem Phòng</a
+          >
+        </li>
+        <li>
+          <a
+            routerLink="/pricing"
+            routerLinkActive="active"
+            class="nav-link"
+            (click)="isMenuOpen = false"
+            >Bảng giá Dịch vụ</a
+          >
+        </li>
+        <li>
+          <a
+            routerLink="/contact"
+            routerLinkActive="active"
+            class="nav-link"
+            (click)="isMenuOpen = false"
+            >Liên hệ</a
+          >
+        </li>
+      </ul>
+
+      <div class="nav-actions d-flex align-items-center gap-3">
+        @if (!isLoggedIn) {
+          <a routerLink="/login" class="btn btn-outline btn-sm" (click)="isMenuOpen = false"
+            >Đăng nhập</a
+          >
+          <a routerLink="/register" class="btn btn-primary btn-sm" (click)="isMenuOpen = false"
+            >Đăng ký</a
+          >
+        } @else {
+          <a
+            routerLink="/profile"
+            class="btn btn-outline btn-sm d-flex align-items-center gap-2"
+            style="border-color: transparent; padding-left: 0.5rem; padding-right: 0.5rem"
+            (click)="isMenuOpen = false"
+          >
+            <i class="fas fa-user-circle" style="color: var(--primary); font-size: 1.25rem"></i>
+            <span style="font-weight: 600">Xin chào, {{ username }}</span>
+          </a>
+
+          <button (click)="logout()" class="btn btn-danger btn-sm d-flex align-items-center gap-2">
+            <i class="fas fa-sign-out-alt"></i> Đăng xuất
+          </button>
+        }
+      </div>
+    </nav>
+  </div>
+</header>

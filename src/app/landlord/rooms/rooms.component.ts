@@ -27,6 +27,7 @@ export class LandLordRoomsComponent implements OnInit {
   isSubmittingHostel = false;
   //model cua modal hostel
   newHostel: any = {
+    id: '',
     name: '',
     cityCode: '',
     districtCode: '',
@@ -83,6 +84,7 @@ export class LandLordRoomsComponent implements OnInit {
   roomImagePreviews: string[] = [];
   roomSelectedFiles: File[] = [];
   isEditModeRoom: boolean = false;
+  isEditModeHostel: boolean = false;
 
   openRoomModal() {
     this.isEditModeRoom = false;
@@ -121,6 +123,9 @@ export class LandLordRoomsComponent implements OnInit {
     this.roomImagePreviews.splice(index, 1);
   }
   onFileSelected(event: Event): void {
+    if (this.isEditModeHostel && this.selectedFiles.length == 0) {
+      this.imagePreviews = [];
+    }
     const input = event.target as HTMLInputElement;
     const files = Array.from(input.files ?? []);
     if (files.length) {
@@ -225,48 +230,27 @@ export class LandLordRoomsComponent implements OnInit {
     });
   }
   loadProvinces() {
-    this.http.get('https://provinces.open-api.vn/api/p/').subscribe((res: any) => {
+    this.http.get('https://provinces.open-api.vn/api/v2/p/').subscribe((res: any) => {
       this.provinces = res;
     });
   }
 
-  onProvinceChange() {
-    this.newHostel.districtCode = '';
-    this.newHostel.wardCode = '';
-    this.districts = [];
+  onProvinceChange(wardCode: string = '') {
+    // this.newHostel.districtCode = '';
+    if (wardCode == '') {
+      this.newHostel.wardCode = '';
+    }
+    // this.districts = [];
     this.wards = [];
-    this.isDistrictLoading = false;
+    // this.isDistrictLoading = false;
     this.isWardLoading = false;
     if (this.newHostel.cityCode) {
       const selectedProvince = this.provinces.find((p) => p.code == this.newHostel.cityCode);
       if (selectedProvince) this.newHostel.city = selectedProvince.name;
 
-      this.isDistrictLoading = true;
-      this.http
-        .get(`https://provinces.open-api.vn/api/p/${this.newHostel.cityCode}?depth=2`)
-        .subscribe(
-          (res: any) => {
-            this.districts = res.districts;
-            this.isDistrictLoading = false;
-            this.cdr.detectChanges();
-          },
-          () => {
-            this.isDistrictLoading = false;
-            this.cdr.detectChanges();
-          },
-        );
-    }
-  }
-  onDistrictChange() {
-    this.newHostel.wardCode = '';
-    this.wards = [];
-    this.isWardLoading = false;
-    if (this.newHostel.districtCode) {
-      const selectDist = this.districts.find((n) => n.code == this.newHostel.districtCode);
-      if (selectDist) this.newHostel.district = selectDist.name;
       this.isWardLoading = true;
       this.http
-        .get(`https://provinces.open-api.vn/api/d/${this.newHostel.districtCode}?depth=2`)
+        .get(`https://provinces.open-api.vn/api/v2/p/${this.newHostel.cityCode}?depth=2`)
         .subscribe(
           (res: any) => {
             this.wards = res.wards;
@@ -280,11 +264,36 @@ export class LandLordRoomsComponent implements OnInit {
         );
     }
   }
+  // onDistrictChange() {
+  //   this.newHostel.wardCode = '';
+  //   this.wards = [];
+  //   this.isWardLoading = false;
+  //   if (this.newHostel.districtCode) {
+  //     const selectDist = this.districts.find((n) => n.code == this.newHostel.districtCode);
+  //     if (selectDist) this.newHostel.district = selectDist.name;
+  //     this.isWardLoading = true;
+  //     this.http
+  //       .get(`https://provinces.open-api.vn/api/d/${this.newHostel.districtCode}?depth=2`)
+  //       .subscribe(
+  //         (res: any) => {
+  //           this.wards = res.wards;
+  //           this.isWardLoading = false;
+  //           this.cdr.detectChanges();
+  //         },
+  //         () => {
+  //           this.isWardLoading = false;
+  //           this.cdr.detectChanges();
+  //         },
+  //       );
+  //   }
+  // }
 
   onWardChange() {
     if (this.newHostel.wardCode) {
       const selectWard = this.wards.find((n) => n.code == this.newHostel.wardCode);
+      console.log(selectWard);
       if (selectWard) this.newHostel.ward = selectWard.name;
+      console.log(this.newHostel.ward);
     }
   }
 
@@ -346,6 +355,7 @@ export class LandLordRoomsComponent implements OnInit {
   openHostelModal() {
     this.isHostelModalOpen = true;
     this.isSubmittingHostel = false;
+    this.isEditModeHostel = false;
     this.newHostel = {
       name: '',
       cityCode: '',
@@ -444,8 +454,8 @@ export class LandLordRoomsComponent implements OnInit {
     if (this.isSubmittingHostel) {
       return;
     }
-    if (this.selectedFiles.length === 0) {
-      this.toastr.warning('Vui lòng chọn ít nhất 1 ảnh cho tòa nhà');
+    if (this.selectedFiles.length === 0 && !this.isEditModeHostel) {
+      this.toastr.warning('Vui lòng upload ít nhất 1 ảnh cho tòa nhà!');
       return;
     }
 
@@ -456,22 +466,41 @@ export class LandLordRoomsComponent implements OnInit {
     }
     this.isSubmittingHostel = true;
     this.cdr.detectChanges();
-    this.roomService.createHostel(formData).subscribe({
-      next: (res) => {
-        this.isSubmittingHostel = false;
-        this.toastr.success('Thêm tòa nhà thành công!');
-        this.closeHostelModal();
-        this.loadHostelOptions();
-        this.loadHostels();
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        this.isSubmittingHostel = false;
-        console.error('Lỗi: ', err);
-        this.toastr.error('Có lỗi xảy ra khi thêm tòa nhà');
-        this.cdr.detectChanges();
-      },
-    });
+    if (this.isEditModeHostel) {
+      this.roomService.updateHostel(this.newHostel.id, formData).subscribe({
+        next: (res) => {
+          this.isSubmittingHostel = false;
+          this.toastr.success('Cập nhật tòa nhà thành công!');
+          this.closeHostelModal();
+          this.loadHostelOptions();
+          this.loadHostels();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.isSubmittingHostel = false;
+          console.error('Lỗi: ', err);
+          this.toastr.error('Có lỗi xảy ra khi cập nhật tòa nhà');
+          this.cdr.detectChanges();
+        },
+      });
+    } else {
+      this.roomService.createHostel(formData).subscribe({
+        next: (res) => {
+          this.isSubmittingHostel = false;
+          this.toastr.success('Thêm tòa nhà thành công!');
+          this.closeHostelModal();
+          this.loadHostelOptions();
+          this.loadHostels();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.isSubmittingHostel = false;
+          console.error('Lỗi: ', err);
+          this.toastr.error('Có lỗi xảy ra khi thêm tòa nhà');
+          this.cdr.detectChanges();
+        },
+      });
+    }
   }
   openEditRoomModal(room: any) {
     this.isEditModeRoom = true;
@@ -499,6 +528,24 @@ export class LandLordRoomsComponent implements OnInit {
     this.isRoomModalOpen = true;
   }
 
+  openEditHostelModal(hostel: any) {
+    this.isEditModeHostel = true;
+
+    this.newHostel = {
+      id: hostel.id,
+      name: hostel.name,
+      cityCode: hostel.cityCode?.toString() || '',
+      districtCode: hostel.districtCode?.toString() || '',
+      wardCode: hostel.wardCode?.toString() || '',
+      addressDetail: hostel.addressDetail || '',
+      description: hostel.description || '',
+    };
+    if (this.newHostel.cityCode) this.onProvinceChange(this.newHostel.wardCode);
+    if (this.newHostel.wardCode) this.onWardChange();
+    this.imagePreviews = hostel.images;
+    this.isHostelModalOpen = true;
+  }
+
   deleteRoom(id: number) {
     if (confirm('Bạn có chắc chắn muốn xóa phòng này không?')) {
       this.roomService.deleteRoom(id).subscribe({
@@ -507,6 +554,17 @@ export class LandLordRoomsComponent implements OnInit {
           this.loadRooms();
         },
         error: (err) => this.toastr.error('Lỗi xảy ra khi xóa!'),
+      });
+    }
+  }
+  deleteHostel(id: number) {
+    if (confirm('Bạn có chắc chắn muốn xóa tòa nhà này không?')) {
+      this.roomService.deleteHostel(id).subscribe({
+        next: () => {
+          this.toastr.success('Xóa thành công!');
+          this.loadHostels();
+        },
+        error: (err) => this.toastr.error(err.error?.message),
       });
     }
   }

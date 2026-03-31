@@ -1,0 +1,23 @@
+.footer {
+  background-color: #1f2937;
+  color: #9ca3af;
+  padding: 4rem 0 2rem;
+}
+
+.footer-title {
+  color: white;
+  font-size: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.footer-links a {
+  color: #9ca3af;
+  display: block;
+  margin-bottom: 0.75rem;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+  color: white;
+}
