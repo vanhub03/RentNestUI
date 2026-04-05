@@ -1,0 +1,793 @@
+<div class="admin-content" style="padding: 2rem 1.5rem">
+  <div class="wizard-container">
+    <div class="stepper" *ngIf="!isSuccess">
+      <div class="step" [class.active]="currentStep === 1" [class.completed]="currentStep > 1">
+        <div class="step-circle">
+          <i *ngIf="currentStep > 1" class="fas fa-check"></i
+          ><span *ngIf="currentStep <= 1">1</span>
+        </div>
+        <div class="step-label">Chọn Phòng</div>
+      </div>
+      <div class="step-line" [class.completed]="currentStep > 1"></div>
+
+      <div class="step" [class.active]="currentStep === 2" [class.completed]="currentStep > 2">
+        <div class="step-circle">
+          <i *ngIf="currentStep > 2" class="fas fa-check"></i
+          ><span *ngIf="currentStep <= 2">2</span>
+        </div>
+        <div class="step-label">Người ở</div>
+      </div>
+      <div class="step-line" [class.completed]="currentStep > 2"></div>
+
+      <div class="step" [class.active]="currentStep === 3" [class.completed]="currentStep > 3">
+        <div class="step-circle">
+          <i *ngIf="currentStep > 3" class="fas fa-check"></i
+          ><span *ngIf="currentStep <= 3">3</span>
+        </div>
+        <div class="step-label">Hợp đồng & Cọc</div>
+      </div>
+      <div class="step-line" [class.completed]="currentStep > 3"></div>
+
+      <div class="step" [class.active]="currentStep === 4">
+        <div class="step-circle">4</div>
+        <div class="step-label">Xác nhận</div>
+      </div>
+    </div>
+
+    <div class="wizard-step" [class.active]="currentStep === 1" *ngIf="!isSuccess">
+      <div class="wizard-card">
+        <div class="wizard-card-header">
+          <h3><i class="fas fa-door-open text-primary"></i> Chọn Phòng Trống</h3>
+        </div>
+        <div class="wizard-card-body">
+          <label class="form-label mb-2">Danh sách phòng trống</label>
+          <div class="room-select-list d-flex flex-column gap-3">
+            @for (room of availableRooms; track room.id) {
+              <div
+                class="room-select-card"
+                [class.selected]="formData.roomId === room.id"
+                (click)="formData.roomId = room.id"
+              >
+                <div class="room-select-radio">
+                  <div class="room-select-radio-inner"></div>
+                </div>
+
+                <div
+                  style="
+                    width: 60px;
+                    height: 60px;
+                    border-radius: 8px;
+                    overflow: hidden;
+                    flex-shrink: 0;
+                    background: #eee;
+                  "
+                >
+                  <img
+                    *ngIf="room.thumbnail"
+                    [src]="room.thumbnail"
+                    style="width: 100%; height: 100%; object-fit: cover"
+                  />
+                  <div
+                    *ngIf="!room.thumbnail"
+                    class="d-flex align-items-center justify-content-center h-100 text-muted"
+                  >
+                    <i class="fas fa-image"></i>
+                  </div>
+                </div>
+
+                <div class="room-select-info">
+                  <div class="font-semibold">{{ room.title }}</div>
+                  <div class="text-muted text-sm">{{ room.location }}</div>
+                  <div class="text-muted text-xs mt-1">
+                    {{ room.area }}m² · Tầng {{ room.floor }}
+                  </div>
+                </div>
+
+                <div class="room-select-price">
+                  {{ room.price | number }}đ<span
+                    class="text-muted"
+                    style="font-weight: 400; font-size: 0.8rem"
+                    >/th</span
+                  >
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+        <div class="wizard-footer">
+          <a routerLink="/landlord/rooms" class="btn btn-outline"
+            ><i class="fas fa-times"></i> Hủy bỏ</a
+          >
+          <button class="btn btn-primary" (click)="goToStep(2)">
+            Tiếp theo <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="wizard-step" [class.active]="currentStep === 2" *ngIf="!isSuccess">
+      <div class="wizard-card">
+        <div class="wizard-card-header">
+          <h3><i class="fas fa-users text-primary"></i> Danh sách Người ở</h3>
+          <p class="text-muted text-sm m-0 mt-1">
+            Thêm tất cả người sẽ ở. Tick <strong>"Đại diện"</strong> cho người đứng tên ký HĐ.
+          </p>
+        </div>
+        <div class="wizard-card-body" style="padding: 0">
+          <div style="overflow-x: auto">
+            <table class="occupant-table">
+              <thead>
+                <tr>
+                  <th style="width: 40px">#</th>
+                  <th>Họ và Tên <span class="text-danger">*</span></th>
+                  <th>Số điện thoại <span class="text-danger">*</span></th>
+                  <th>CCCD</th>
+                  <th style="text-align: center">Đại diện</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (occ of formData.occupants; track $index) {
+                  <tr>
+                    <td class="text-center text-muted font-medium">{{ $index + 1 }}</td>
+                    <td>
+                      <input
+                        type="text"
+                        class="form-control"
+                        [(ngModel)]="occ.fullName"
+                        placeholder="Nguyễn Văn A"
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="tel"
+                        class="form-control"
+                        [(ngModel)]="occ.phoneNumber"
+                        placeholder="0987..."
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="text"
+                        class="form-control"
+                        [(ngModel)]="occ.identityCard"
+                        placeholder="Số CCCD"
+                      />
+                    </td>
+                    <td class="rep-radio">
+                      <input
+                        type="radio"
+                        name="rep"
+                        [checked]="occ.isRepresentative"
+                        (change)="setRepresentative($index)"
+                      />
+                    </td>
+                    <td class="text-center">
+                      <button
+                        class="btn-remove-row"
+                        (click)="removeOccupant($index)"
+                        [disabled]="formData.occupants.length === 1"
+                      >
+                        <i class="fas fa-trash-alt"></i>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          <div style="padding: 0 1.75rem 1.25rem">
+            <button class="btn-add-occupant" (click)="addOccupant()">
+              <i class="fas fa-plus-circle"></i> Thêm người ở
+            </button>
+          </div>
+
+          <div style="padding: 0 1.75rem 1.5rem">
+            <label class="form-label d-flex justify-content-between">
+              <span
+                ><i class="fas fa-id-card text-primary" style="margin-right: 6px"></i>Ảnh CCCD người
+                đại diện <span class="text-muted text-xs">(tùy chọn)</span></span
+              >
+              <span class="text-xs text-muted">2 mặt · JPG/PNG</span>
+            </label>
+
+            <div class="d-flex gap-3">
+              <div class="w-50">
+                <input
+                  type="file"
+                  id="cccdFrontInput"
+                  style="display: none"
+                  accept="image/png, image/jpeg"
+                  (change)="onCccdSelected($event, 'front')"
+                />
+
+                <div
+                  class="cccd-upload-area position-relative d-flex flex-column align-items-center justify-content-center"
+                  (click)="triggerFileInput('cccdFrontInput')"
+                  style="overflow: hidden; height: 120px"
+                >
+                  <ng-container *ngIf="!cccdFrontPreview">
+                    <i class="fas fa-id-card text-muted mb-2" style="font-size: 1.5rem"></i>
+                    <div class="text-sm font-medium">Mặt trước</div>
+                    <div class="text-xs text-muted mt-1">Click để chọn ảnh</div>
+                  </ng-container>
+
+                  <img
+                    *ngIf="cccdFrontPreview"
+                    [src]="cccdFrontPreview"
+                    class="position-absolute top-0 start-0 w-100 h-100"
+                    style="object-fit: cover; z-index: 1"
+                  />
+                  <div
+                    *ngIf="cccdFrontPreview"
+                    class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+                    style="background: rgba(0, 0, 0, 0.4); z-index: 2"
+                  >
+                    <div
+                      class="text-white font-bold"
+                      style="text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8)"
+                    >
+                      <i class="fas fa-check-circle text-success me-1"></i> Đã chọn
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="w-50">
+                <input
+                  type="file"
+                  id="cccdBackInput"
+                  style="display: none"
+                  accept="image/png, image/jpeg"
+                  (change)="onCccdSelected($event, 'back')"
+                />
+
+                <div
+                  class="cccd-upload-area position-relative d-flex flex-column align-items-center justify-content-center"
+                  (click)="triggerFileInput('cccdBackInput')"
+                  style="overflow: hidden; height: 120px"
+                >
+                  <ng-container *ngIf="!cccdBackPreview">
+                    <i class="fas fa-id-card text-muted mb-2" style="font-size: 1.5rem"></i>
+                    <div class="text-sm font-medium">Mặt sau</div>
+                    <div class="text-xs text-muted mt-1">Click để chọn ảnh</div>
+                  </ng-container>
+
+                  <img
+                    *ngIf="cccdBackPreview"
+                    [src]="cccdBackPreview"
+                    class="position-absolute top-0 start-0 w-100 h-100"
+                    style="object-fit: cover; z-index: 1"
+                  />
+                  <div
+                    *ngIf="cccdBackPreview"
+                    class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+                    style="background: rgba(0, 0, 0, 0.4); z-index: 2"
+                  >
+                    <div
+                      class="text-white font-bold"
+                      style="text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8)"
+                    >
+                      <i class="fas fa-check-circle text-success me-1"></i> Đã chọn
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="wizard-footer">
+          <button class="btn btn-outline" (click)="goToStep(1)">
+            <i class="fas fa-arrow-left"></i> Quay lại
+          </button>
+          <button class="btn btn-primary" (click)="goToStep(3)">
+            Tiếp theo <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="wizard-step" [class.active]="currentStep === 3" *ngIf="!isSuccess">
+      <div class="wizard-card">
+        <div class="wizard-card-header">
+          <h3><i class="fas fa-file-signature text-primary"></i> Hợp Đồng & Tiền Cọc</h3>
+        </div>
+        <div class="wizard-card-body">
+          <div
+            class="d-flex align-items-center gap-3 p-3 mb-4"
+            style="
+              background: rgba(15, 82, 186, 0.04);
+              border: 1px solid rgba(15, 82, 186, 0.12);
+              border-radius: var(--radius-md);
+            "
+          >
+            <div
+              style="
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background: rgba(15, 82, 186, 0.1);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: var(--primary);
+              "
+            >
+              <i class="fas fa-user-check"></i>
+            </div>
+            <div>
+              <div class="text-xs text-muted">Người đại diện ký hợp đồng</div>
+              <div class="font-bold">{{ representative.fullName || '—' }}</div>
+            </div>
+            <span class="rep-badge" style="margin-left: auto"
+              ><i class="fas fa-star"></i> Đại diện</span
+            >
+          </div>
+
+          <div class="d-grid grid-cols-2 gap-4">
+            <div class="form-group">
+              <label class="form-label">Ngày bắt đầu <span class="text-danger">*</span></label>
+              <input type="date" class="form-control" [(ngModel)]="formData.startDate" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Ngày kết thúc (Để trống = Vô thời hạn)</label>
+              <input type="date" class="form-control" [(ngModel)]="formData.endDate" />
+            </div>
+          </div>
+
+          <div class="d-grid grid-cols-2 gap-4">
+            <div class="form-group">
+              <label class="form-label">Tiền cọc đã nhận <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  [value]="displayDepositAmount"
+                  (input)="formatDeposit($event)"
+                  placeholder="VD: 5,000,000"
+                />
+                <span class="input-group-text">đ</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Hình thức nhận cọc</label>
+              <select class="form-control" [(ngModel)]="formData.depositMethod">
+                <option value="CASH">Tiền mặt</option>
+                <option value="BANK_TRANSFER">Chuyển khoản</option>
+                <option value="VNPAY">VNPay</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group mt-4">
+            <label class="form-label"
+              ><i class="fas fa-file-pdf text-danger" style="margin-right: 6px"></i>Upload file hợp
+              đồng <span class="text-muted text-xs">(tùy chọn — bản scan)</span></label
+            >
+
+            <input
+              type="file"
+              id="contractInput"
+              class="d-none"
+              (change)="onContractSelected($event)"
+              accept=".pdf,image/*"
+              style="display: none"
+            />
+
+            <div
+              class="cccd-upload-area"
+              style="padding: 1.5rem 1rem"
+              (click)="triggerFileInput('contractInput')"
+            >
+              <i
+                *ngIf="!contractFileName"
+                class="fas fa-cloud-upload-alt text-muted mb-2"
+                style="font-size: 1.8rem"
+              ></i>
+              <i
+                *ngIf="contractFileName"
+                class="fas fa-file-contract text-success mb-2"
+                style="font-size: 1.8rem"
+              ></i>
+
+              <div class="text-sm font-medium">
+                {{ contractFileName ? contractFileName : 'Click để chọn file hợp đồng' }}
+              </div>
+              <div *ngIf="!contractFileName" class="text-xs text-muted mt-1">
+                PDF, JPG, PNG — Tối đa 10MB
+              </div>
+              <div *ngIf="contractFileName" class="text-xs text-success mt-1">
+                Đã đính kèm sẵn sàng!
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex gap-3 mt-4 pt-3 border-top">
+            <button class="btn btn-outline flex-1" (click)="printContractTemplate()">
+              <i class="fas fa-print text-muted me-2"></i> In Hợp Đồng Giấy
+            </button>
+            <button class="btn btn-outline flex-1" (click)="downloadContractTemplate()">
+              <i class="fas fa-file-download text-muted me-2"></i> Tải Mẫu PDF
+            </button>
+          </div>
+        </div>
+        <div class="wizard-footer">
+          <button class="btn btn-outline" (click)="goToStep(2)">
+            <i class="fas fa-arrow-left"></i> Quay lại
+          </button>
+          <button class="btn btn-primary" (click)="goToStep(4)">
+            Tiếp theo <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="wizard-step" [class.active]="currentStep === 4" *ngIf="!isSuccess">
+      <div class="wizard-card">
+        <div class="wizard-card-header">
+          <h3><i class="fas fa-clipboard-check text-primary"></i> Xác Nhận & Kích Hoạt</h3>
+        </div>
+
+        <div class="wizard-card-body p-4 bg-white">
+          <div class="mb-4">
+            <div
+              class="text-uppercase fw-bold mb-3 d-flex align-items-center"
+              style="font-size: 0.85rem; color: #64748b; letter-spacing: 0.5px"
+            >
+              <i class="fas fa-door-open me-2" style="font-size: 1rem"></i> PHÒNG
+            </div>
+            <div class="d-flex justify-content-between py-3 border-bottom border-light">
+              <span style="color: #64748b">Phòng</span>
+              <span class="text-primary fw-medium">{{ selectedRoomObj?.title }}</span>
+            </div>
+            <div class="d-flex justify-content-between py-3 border-bottom border-light">
+              <span style="color: #64748b">Cơ sở</span>
+              <span class="fw-medium text-dark">{{ selectedRoomObj?.location }}</span>
+            </div>
+            <div class="d-flex justify-content-between py-3 border-bottom border-light">
+              <span style="color: #64748b">Giá thuê</span>
+              <span class="fw-medium text-dark"
+                >{{ selectedRoomObj?.price | number }}đ / tháng</span
+              >
+            </div>
+          </div>
+
+          <div class="mb-4 pt-2">
+            <div
+              class="text-uppercase fw-bold mb-3 d-flex align-items-center"
+              style="font-size: 0.85rem; color: #64748b; letter-spacing: 0.5px"
+            >
+              <i class="fas fa-users me-2" style="font-size: 1rem"></i> NGƯỜI Ở ({{
+                formData.occupants.length
+              }}
+              NGƯỜI)
+            </div>
+            @for (occ of formData.occupants; track $index) {
+              <div class="d-flex align-items-center gap-3 py-3 border-bottom border-light">
+                <div
+                  style="
+                    width: 36px;
+                    height: 36px;
+                    border-radius: 50%;
+                    background: #f1f5f9;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: bold;
+                    color: #64748b;
+                    font-size: 0.9rem;
+                  "
+                >
+                  {{ $index + 1 }}
+                </div>
+                <div>
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="fw-medium text-dark" style="font-size: 1.05rem">{{
+                      occ.fullName || 'Người ' + ($index + 1)
+                    }}</span>
+                    <span
+                      *ngIf="occ.isRepresentative"
+                      class="badge rounded-pill"
+                      style="
+                        background: #eff6ff;
+                        color: #3b82f6;
+                        font-size: 0.75rem;
+                        padding: 0.35em 0.65em;
+                      "
+                    >
+                      <i class="fas fa-star me-1"></i> Đại diện
+                    </span>
+                  </div>
+                  <div class="text-muted mt-1" style="font-size: 0.9rem">
+                    {{ occ.phoneNumber || '—' }}
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="mb-4 pt-2">
+            <div
+              class="text-uppercase fw-bold mb-3 d-flex align-items-center"
+              style="font-size: 0.85rem; color: #64748b; letter-spacing: 0.5px"
+            >
+              <i class="fas fa-file-signature me-2" style="font-size: 1rem"></i> HỢP ĐỒNG
+            </div>
+            <div class="d-flex justify-content-between py-3 border-bottom border-light">
+              <span style="color: #64748b">Người đại diện ký HĐ</span>
+              <span class="fw-medium text-dark">{{ representative.fullName || '—' }}</span>
+            </div>
+            <div class="d-flex justify-content-between py-3 border-bottom border-light">
+              <span style="color: #64748b">Thời hạn</span>
+              <span class="fw-medium text-dark"
+                >{{ formatDateVN(formData.startDate) }} → {{ formatDateVN(formData.endDate) }}</span
+              >
+            </div>
+            <div class="d-flex justify-content-between py-3 border-bottom border-light">
+              <span style="color: #64748b">Tiền cọc đã nhận</span>
+              <span class="fw-bold" style="color: #10b981; font-size: 1.05rem"
+                >{{ formData.depositAmount | number }}đ</span
+              >
+            </div>
+            <div class="d-flex justify-content-between py-3 border-bottom border-light">
+              <span style="color: #64748b">Hình thức nhận cọc</span>
+              <span class="fw-medium text-dark">{{ depositMethodLabel }}</span>
+            </div>
+          </div>
+
+          <div class="p-3 rounded mt-2" style="background: #faf5ff; border: 1px solid #e9d5ff">
+            <div class="d-flex gap-3 align-items-start">
+              <i class="fas fa-magic mt-1" style="color: #8b5cf6; font-size: 1.2rem"></i>
+              <div>
+                <div class="fw-bold" style="color: #7c3aed; font-size: 0.95rem">
+                  Tự động liên kết App
+                </div>
+                <div style="color: #6b7280; font-size: 0.9rem; margin-top: 4px; line-height: 1.5">
+                  Khách có thể tải App <strong class="text-dark">bất kỳ lúc nào</strong>, đăng ký
+                  bằng đúng SĐT đã nhập ở trên → hệ thống tự động nhận diện và link tài khoản vào
+                  phòng. Không cần gửi link hay mời tải App!
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="wizard-footer" style="padding: 1.5rem">
+          <button
+            class="btn btn-light border px-4 py-2"
+            (click)="goToStep(3)"
+            [disabled]="isSubmitting"
+          >
+            <i class="fas fa-arrow-left me-2"></i> Quay lại
+          </button>
+
+          <button
+            class="btn px-4 py-2 text-white font-medium shadow-sm"
+            (click)="submitForm()"
+            [disabled]="isSubmitting"
+            style="background-color: #10b981; border-color: #10b981"
+          >
+            <i *ngIf="!isSubmitting" class="fas fa-check-circle me-2"></i>
+            <i *ngIf="isSubmitting" class="fas fa-spinner fa-spin me-2"></i>
+            {{ isSubmitting ? 'Đang xử lý...' : 'Kích Hoạt Phòng' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="success-page" [class.show]="isSuccess" style="text-align: center">
+      <div
+        style="
+          width: 80px;
+          height: 80px;
+          border-radius: 50%;
+          background: #d1fae5;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0 auto 1rem;
+        "
+      >
+        <div
+          style="
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #10b981;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);
+          "
+        >
+          <i class="fas fa-check"></i>
+        </div>
+      </div>
+
+      <h2 style="font-size: 1.5rem; font-weight: 700; color: #10b981; margin-bottom: 0.5rem">
+        Kích Hoạt Thành Công!
+      </h2>
+      <p style="color: #64748b; margin-bottom: 1.5rem">
+        Phòng đã chuyển trạng thái <strong style="color: #475569">ĐANG THUÊ</strong> (OCCUPIED).
+      </p>
+
+      <div
+        style="
+          max-width: 500px;
+          margin: 0 auto 1.5rem;
+          padding: 1.5rem;
+          border: 1px solid #a7f3d0;
+          background-color: #f0fdf4;
+          border-radius: 0.75rem;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+          text-align: left;
+        "
+      >
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+          "
+        >
+          <div
+            style="
+              width: 48px;
+              height: 48px;
+              border-radius: 0.5rem;
+              background: #dbeafe;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: #2563eb;
+              font-size: 1.25rem;
+              flex-shrink: 0;
+              margin-right: 1rem;
+            "
+          >
+            <i class="fas fa-door-open"></i>
+          </div>
+          <div>
+            <div style="font-weight: 700; color: #1e293b; font-size: 1.05rem">
+              {{ selectedRoomObj?.title }}
+            </div>
+            <div style="display: flex; align-items: center; margin-top: 0.35rem">
+              <span
+                style="
+                  background-color: #e0e7ff;
+                  color: #60a5fa;
+                  text-decoration: line-through;
+                  padding: 0.15rem 0.5rem;
+                  border-radius: 0.25rem;
+                  font-size: 0.75rem;
+                  font-weight: 600;
+                  margin-right: 0.5rem;
+                "
+                >AVAILABLE</span
+              >
+              <i
+                class="fas fa-arrow-right"
+                style="color: #94a3b8; font-size: 0.75rem; margin-right: 0.5rem"
+              ></i>
+              <span
+                style="
+                  background-color: #d1fae5;
+                  color: #10b981;
+                  padding: 0.15rem 0.5rem;
+                  border-radius: 0.25rem;
+                  font-size: 0.75rem;
+                  font-weight: 600;
+                "
+                >OCCUPIED</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <div
+          style="
+            border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+          "
+        >
+          @for (occ of formData.occupants; track $index) {
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.25rem 0;
+              "
+            >
+              <span style="color: #1e293b; font-weight: 500; font-size: 0.95rem">
+                <span *ngIf="occ.isRepresentative" style="margin-right: 0.25rem">⭐</span>
+                {{ occ.fullName || 'Người ' + ($index + 1) }}
+              </span>
+              <span style="color: #64748b; font-size: 0.9rem">{{ occ.phoneNumber || '—' }}</span>
+            </div>
+          }
+        </div>
+
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.95rem;
+          "
+        >
+          <span style="color: #64748b">Tiền cọc</span>
+          <span style="color: #10b981; font-weight: 700; font-size: 1.1rem"
+            >{{ formData.depositAmount | number }}đ</span
+          >
+        </div>
+      </div>
+
+      <div
+        style="
+          max-width: 500px;
+          margin: 0 auto 2rem;
+          padding: 1rem;
+          border-radius: 0.5rem;
+          background: #faf5ff;
+          border: 1px solid #e9d5ff;
+          text-align: left;
+          display: flex;
+          align-items: flex-start;
+        "
+      >
+        <i
+          class="fas fa-magic"
+          style="color: #8b5cf6; font-size: 1.2rem; margin-top: 0.25rem; margin-right: 1rem"
+        ></i>
+        <div>
+          <div style="font-weight: 700; color: #7c3aed; font-size: 0.95rem">Auto-link bằng SĐT</div>
+          <div style="color: #6b7280; font-size: 0.9rem; margin-top: 0.25rem; line-height: 1.5">
+            Khi khách tải App và đăng ký bằng SĐT đã nhập → phòng tự hiện lên trong App. Không cần
+            mời hay gửi link!
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: center; margin-top: 1.5rem">
+        <button
+          class="btn"
+          routerLink="/landlord/rooms"
+          style="
+            padding: 0.6rem 1.5rem;
+            font-weight: 500;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 0.375rem;
+            margin-right: 1rem;
+            cursor: pointer;
+          "
+        >
+          <i class="fas fa-list" style="margin-right: 0.5rem"></i> Quản lý Phòng
+        </button>
+        <button
+          class="btn"
+          routerLink="/landlord/tenants"
+          style="
+            padding: 0.6rem 1.5rem;
+            font-weight: 500;
+            background-color: #f8fafc;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.375rem;
+            cursor: pointer;
+          "
+        >
+          <i class="fas fa-user-friends" style="margin-right: 0.5rem"></i> Danh sách Khách
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

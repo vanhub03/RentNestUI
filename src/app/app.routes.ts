@@ -5,6 +5,8 @@ import { RegisterComponent } from './register/register.component';
 import { LandlordLayoutComponent } from './layouts/landlord-layout/landlord-layout.component';
 import { LandLordRoomsComponent } from './landlord/rooms/rooms.component';
 import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
+import { LandlordTenantsComponent } from './landlord/tenants/tenants.component';
+import { AddTenantComponent } from './landlord/add-tenants/add-tenant.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -14,6 +16,8 @@ export const routes: Routes = [
     component: LandlordLayoutComponent,
     children: [
       { path: 'rooms', component: LandLordRoomsComponent },
+      { path: 'tenants', component: LandlordTenantsComponent },
+      { path: 'add-tenant', component: AddTenantComponent },
       { path: '', redirectTo: 'rooms', pathMatch: 'full' },
     ],
   },
@@ -22,7 +26,7 @@ export const routes: Routes = [
     component: MainLayoutComponent,
     children: [
       { path: 'home', component: HomeComponent },
-      { path: '', redirectTo: 'login', pathMatch: 'full' },
+      { path: '', redirectTo: 'home', pathMatch: 'full' },
     ],
   },
   { path: '**', redirectTo: 'login' },

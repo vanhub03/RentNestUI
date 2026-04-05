@@ -1,0 +1,121 @@
+<div class="admin-content">
+  <div class="mb-4 d-flex justify-content-between align-items-center">
+    <h2 class="m-0 font-bold" style="font-size: 1.5rem">Quản lý Khách Thuê</h2>
+  </div>
+
+  <div class="card p-0 mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+      <div class="d-flex gap-3">
+        <input
+          type="text"
+          class="form-control form-control-sm"
+          placeholder="Tìm tên, SĐT, CCCD khách..."
+          style="width: 280px"
+          [(ngModel)]="keyword"
+          (keyup.enter)="onSearch()"
+        />
+        <button class="btn btn-outline" (click)="onSearch()">
+          <i class="fas fa-search"></i> Tìm kiếm
+        </button>
+      </div>
+      <button routerLink="/landlord/add-tenant" class="btn btn-primary">
+        <i class="fas fa-user-plus"></i> Thêm Khách Mới
+      </button>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Khách Thuê</th>
+            <th>Liên hệ (SĐT / Email)</th>
+            <th>CMND/CCCD</th>
+            <th>Phòng đang ở</th>
+            <th>Vai trò</th>
+            <th class="text-right">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (isLoading) {
+            <tr>
+              <td colspan="6" class="text-center py-4 text-muted">
+                <i class="fas fa-spinner fa-spin me-2"></i> Đang tải dữ liệu...
+              </td>
+            </tr>
+          } @else {
+            @for (tenant of tenants; track tenant.id) {
+              <tr>
+                <td>
+                  <div class="d-flex align-items-center gap-2">
+                    <img
+                      [src]="
+                        'https://ui-avatars.com/api/?name=' +
+                        tenant.fullName +
+                        '&background=random&color=fff'
+                      "
+                      style="width: 32px; height: 32px; border-radius: 50%"
+                      alt="avatar"
+                    />
+                    <span class="font-medium text-primary">{{ tenant.fullName }}</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="font-medium">{{ tenant.phoneNumber }}</div>
+                  <div class="text-muted text-xs">{{ tenant.email }}</div>
+                </td>
+                <td>{{ tenant.identityCard }}</td>
+                <td>
+                  <a href="javascript:void(0)" class="text-primary font-medium">{{
+                    tenant.roomName
+                  }}</a>
+                  <div class="text-muted text-xs">{{ tenant.hostelName }}</div>
+                </td>
+                <td>
+                  <span
+                    class="badge"
+                    [ngClass]="tenant.representative ? 'badge-success' : 'badge-secondary'"
+                  >
+                    {{ tenant.representative ? 'Đại diện HĐ' : 'Ở ghép' }}
+                  </span>
+                </td>
+                <td class="text-right">
+                  <button class="btn btn-sm btn-outline" title="Xem chi tiết">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button class="btn btn-sm btn-outline ms-2" title="Chỉnh sửa">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" class="text-center py-4 text-muted">Bạn chưa có khách thuê nào.</td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card-footer d-flex justify-content-between align-items-center bg-transparent">
+      <span class="text-sm text-muted">
+        Hiển thị trang {{ page + 1 }} / {{ totalPages || 1 }} (Tổng: {{ totalElements }} khách)
+      </span>
+      <ul class="pagination m-0">
+        <li class="page-item" [class.disabled]="page === 0">
+          <a class="page-link" (click)="changePage(page - 1)"
+            ><i class="fas fa-chevron-left"></i
+          ></a>
+        </li>
+        <li class="page-item active">
+          <a class="page-link">{{ page + 1 }}</a>
+        </li>
+        <li class="page-item" [class.disabled]="page >= totalPages - 1 || totalPages === 0">
+          <a class="page-link" (click)="changePage(page + 1)"
+            ><i class="fas fa-chevron-right"></i
+          ></a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

@@ -1,25 +1,76 @@
-<div class="admin-layout">
-  <aside class="sidebar" [class.active]="isSidebarOpen">
-    <div class="sidebar-header"><i class="fas fa-home text-primary"></i> RentNest Landlord</div>
+<div
+  class="admin-layout"
+  [class.sidebar-open]="isSidebarOpen"
+  [class.sidebar-collapsed]="!isMobileView && isDesktopSidebarCollapsed"
+>
+  <div class="sidebar-backdrop" [class.active]="isSidebarOpen" (click)="closeSidebar()"></div>
+
+  <aside
+    class="sidebar"
+    [class.active]="isSidebarOpen"
+    [class.mobile]="isMobileView"
+    [class.collapsed]="!isMobileView && isDesktopSidebarCollapsed"
+  >
+    <div class="sidebar-header">
+      <div class="sidebar-brand">
+        <i class="fas fa-home text-primary"></i>
+        <span class="sidebar-brand-label">RentNest Landlord</span>
+      </div>
+      <button
+        type="button"
+        class="sidebar-close d-lg-none"
+        (click)="closeSidebar()"
+        aria-label="Đóng menu"
+      >
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
     <nav class="sidebar-nav">
-      <div class="px-3 mb-2 text-xs font-semibold text-muted text-uppercase tracking-wider">
+      <div class="sidebar-section-title px-3 mb-2 text-xs font-semibold text-muted text-uppercase">
         Tổng quan
       </div>
-      <a routerLink="/landlord/dashboard" routerLinkActive="active" class="sidebar-link">
-        <i class="fas fa-chart-line"></i> Dashboard
+      <a
+        routerLink="/landlord/dashboard"
+        routerLinkActive="active"
+        class="sidebar-link"
+        (click)="handleNavClick()"
+      >
+        <i class="fas fa-chart-line"></i>
+        <span class="sidebar-link-label">Dashboard</span>
       </a>
 
-      <div class="px-3 mt-4 mb-2 text-xs font-semibold text-muted text-uppercase tracking-wider">
-        Quản lý Dữ liệu
+      <div
+        class="sidebar-section-title px-3 mt-4 mb-2 text-xs font-semibold text-muted text-uppercase"
+      >
+        Quản lý dữ liệu
       </div>
-      <a routerLink="/landlord/rooms" routerLinkActive="active" class="sidebar-link">
-        <i class="fas fa-door-open"></i> Phòng & Giường
+      <a
+        routerLink="/landlord/rooms"
+        routerLinkActive="active"
+        class="sidebar-link"
+        (click)="handleNavClick()"
+      >
+        <i class="fas fa-door-open"></i>
+        <span class="sidebar-link-label">Phòng & Giường</span>
       </a>
-      <a routerLink="/landlord/tenants" routerLinkActive="active" class="sidebar-link">
-        <i class="fas fa-users"></i> Khách Thuê
+      <a
+        routerLink="/landlord/tenants"
+        routerLinkActive="active"
+        class="sidebar-link"
+        (click)="handleNavClick()"
+      >
+        <i class="fas fa-users"></i>
+        <span class="sidebar-link-label">Khách thuê</span>
       </a>
-      <a routerLink="/landlord/contracts" routerLinkActive="active" class="sidebar-link">
-        <i class="fas fa-file-signature"></i> Hợp Đồng
+      <a
+        routerLink="/landlord/contracts"
+        routerLinkActive="active"
+        class="sidebar-link"
+        (click)="handleNavClick()"
+      >
+        <i class="fas fa-file-signature"></i>
+        <span class="sidebar-link-label">Hợp đồng</span>
       </a>
     </nav>
   </aside>
@@ -27,8 +78,17 @@
   <main class="admin-main">
     <header class="admin-header">
       <div class="d-flex align-items-center gap-3">
-        <button class="btn btn-icon d-lg-none" (click)="toggleSidebar()">
-          <i class="fas fa-bars"></i>
+        <button
+          type="button"
+          class="sidebar-toggle"
+          [class.active]="isSidebarVisible"
+          (click)="toggleSidebar()"
+          [attr.aria-expanded]="isSidebarVisible"
+          [attr.aria-label]="isSidebarVisible ? 'Thu gọn menu điều hướng' : 'Mở menu điều hướng'"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
         </button>
       </div>
       <div class="d-flex align-items-center gap-3">

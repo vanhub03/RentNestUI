@@ -42,4 +42,7 @@ export class RoomService {
   getAvailableLocations(): Observable<string[]> {
     return this.http.get<string[]>(enviroment.apiUrl + '/public/locations');
   }
+  getAvailableRooms(): Observable<any[]> {
+    return this.http.get<any[]>(`${enviroment.apiUrl}/landlord/available`);
+  }
 }
