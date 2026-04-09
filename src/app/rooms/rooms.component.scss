@@ -1,0 +1,67 @@
+.filter-sidebar {
+  background-color: var(--bg-surface, #fff);
+  padding: 1.5rem;
+  border-radius: var(--radius-lg, 12px);
+  border: 1px solid var(--border-color, #e5e7eb);
+  position: sticky;
+  top: 90px;
+}
+
+.filter-group {
+  margin-bottom: 1.5rem;
+}
+
+.filter-title {
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  color: var(--text-muted, #6b7280);
+  transition: color 0.2s;
+
+  &:hover {
+    color: var(--text-primary, #111827);
+  }
+}
+
+.price-range {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.price-input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: var(--radius-sm, 6px);
+  outline: none;
+  &:focus {
+    border-color: var(--primary-color, #3b82f6);
+  }
+}
+
+/* Skeleton Loading cho mượt */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeletonLoading 1.5s infinite;
+  border-radius: 8px;
+}
+@keyframes skeletonLoading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

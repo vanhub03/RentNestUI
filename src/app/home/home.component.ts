@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { RoomService } from '../_services/room.service';
 import { RoomCardComponent } from '../component/ui/room-card/room-card.component';
 import { ScrollRevealDirective } from '../_directives/scroll-reveal.directive';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-home',
@@ -14,9 +15,11 @@ import { ScrollRevealDirective } from '../_directives/scroll-reveal.directive';
 })
 export class HomeComponent implements OnInit {
   searchForm: any = {
-    district: '',
+    cityCode: '',
+    wardCode: '',
     price: '',
   };
+  district = '';
   availableLocations: string[] = [];
   latestRooms: any[] = [];
 
@@ -24,10 +27,14 @@ export class HomeComponent implements OnInit {
     private roomService: RoomService,
     private router: Router,
     private cdr: ChangeDetectorRef,
+    private http: HttpClient,
   ) {}
   ngOnInit(): void {
     this.fetchLatestRoom();
     this.fetchLocations();
+    this.http.get('https://provinces.open-api.vn/api/v2/p/').subscribe((res: any) => {
+      this.provinces = res;
+    });
   }
 
   fetchLatestRoom(): void {
@@ -52,6 +59,28 @@ export class HomeComponent implements OnInit {
         console.log(err);
       },
     });
+  }
+
+  provinces: any[] = [];
+  wards: any[] = [];
+
+  onDistrictChange() {
+    if (this.district === '') {
+      this.searchForm.cityCode = '';
+      this.searchForm.wardCode = '';
+    } else {
+      this.searchForm.cityCode = this.provinces.find(
+        (a) => a.name === this.district.split(', ')[1],
+      ).code; // string a = thanh xuan| ha noi -> a.split('| ') -> [thanh xuan, ha noi]
+      this.http
+        .get(`https://provinces.open-api.vn/api/v2/p/${this.searchForm.cityCode}?depth=2`)
+        .subscribe((res: any) => {
+          this.wards = res.wards;
+          this.searchForm.wardCode = this.wards.find(
+            (a) => a.name === this.district.split(', ')[0],
+          ).code;
+        });
+    }
   }
 
   onSearch(): void {

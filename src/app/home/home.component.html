@@ -16,8 +16,9 @@
           <select
             class="form-control"
             name="district"
-            [(ngModel)]="searchForm.district"
+            [(ngModel)]="district"
             style="border: none; background-color: var(--bg-alt); padding: 0.5rem"
+            (change)="onDistrictChange()"
           >
             <option value="">Tất cả quận/huyện</option>
 
@@ -39,9 +40,9 @@
             style="border: none; background-color: var(--bg-alt); padding: 0.5rem"
           >
             <option value="">Mọi mức giá</option>
-            <option value="under3">Dưới 3 triệu</option>
-            <option value="3to5">3 - 5 triệu</option>
-            <option value="over5">Trên 5 triệu</option>
+            <option value="under2">Dưới 2 triệu</option>
+            <option value="2to4">2 - 4 triệu</option>
+            <option value="over4">Trên 4 triệu</option>
           </select>
         </div>
         <div class="d-flex align-items-end">

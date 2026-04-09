@@ -7,6 +7,7 @@ import { LandLordRoomsComponent } from './landlord/rooms/rooms.component';
 import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
 import { LandlordTenantsComponent } from './landlord/tenants/tenants.component';
 import { AddTenantComponent } from './landlord/add-tenants/add-tenant.component';
+import { PublicRoomsComponent } from './rooms/rooms.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -26,6 +27,7 @@ export const routes: Routes = [
     component: MainLayoutComponent,
     children: [
       { path: 'home', component: HomeComponent },
+      { path: 'rooms', component: PublicRoomsComponent },
       { path: '', redirectTo: 'home', pathMatch: 'full' },
     ],
   },

@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { enviroment } from '../../env';
@@ -44,5 +44,31 @@ export class RoomService {
   }
   getAvailableRooms(): Observable<any[]> {
     return this.http.get<any[]>(`${enviroment.apiUrl}/landlord/available`);
+  }
+
+  getPublicRooms(filter: any): Observable<any> {
+    let params = new HttpParams();
+    if (filter.cityCode) {
+      params = params.set('cityCode', filter.cityCode); // ?cityCode=...
+    }
+    if (filter.wardCode) {
+      params = params.set('wardCode', filter.wardCode);
+    }
+    if (filter.minPrice !== null && filter.minPrice !== undefined) {
+      params = params.set('minPrice', filter.minPrice.toString());
+    }
+    if (filter.maxPrice !== null && filter.maxPrice !== undefined) {
+      params = params.set('maxPrice', filter.maxPrice.toString());
+    }
+    if (filter.sort) {
+      params = params.set('sort', filter.sort);
+    }
+    if (filter.page !== undefined) {
+      params = params.set('page', filter.page);
+    }
+    if (filter.size !== undefined) {
+      params = params.set('size', filter.size);
+    }
+    return this.http.get(enviroment.apiUrl + '/public/rooms', { params });
   }
 }
