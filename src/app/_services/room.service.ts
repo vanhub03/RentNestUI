@@ -71,4 +71,8 @@ export class RoomService {
     }
     return this.http.get(enviroment.apiUrl + '/public/rooms', { params });
   }
+
+  getRoomDetail(id: number): Observable<any> {
+    return this.http.get(enviroment.apiUrl + `/public/rooms/${id}`);
+  }
 }

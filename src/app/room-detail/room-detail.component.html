@@ -1,0 +1,324 @@
+<main class="py-4">
+  <div class="container" *ngIf="isLoading">
+    <div class="text-center py-5 text-muted">
+      <i class="fas fa-spinner fa-spin fa-2x"></i> Đang tải thông tin...
+    </div>
+  </div>
+
+  <div class="container" *ngIf="!isLoading && room">
+    <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-3">
+      <div>
+        <div class="d-flex gap-2 mb-2">
+          <span
+            class="badge"
+            [ngClass]="room.status === 'AVAILABLE' ? 'badge-success' : 'badge-warning'"
+          >
+            {{ room.status === 'AVAILABLE' ? 'Còn phòng' : 'Đang thuê' }}
+          </span>
+          <span class="badge" style="background: var(--bg-alt); color: var(--text-main)">
+            <i class="fas fa-check-circle text-primary"></i> Đã xác thực
+          </span>
+        </div>
+        <h1 class="font-bold m-0" style="font-size: 2rem">{{ room.roomName }}</h1>
+        <p class="text-muted mt-2 mb-0">
+          <i class="fas fa-map-marker-alt"></i> {{ room.fullAddress }}
+        </p>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-outline btn-icon rounded-circle">
+          <i class="far fa-heart"></i>
+        </button>
+      </div>
+    </div>
+
+    <div
+      class="gallery-grid"
+      *ngIf="room.images?.length > 0"
+      [ngClass]="'gallery-count-' + (room.images.length > 5 ? 5 : room.images.length)"
+    >
+      <div
+        class="gallery-item"
+        *ngFor="let img of room.images | slice: 0 : 5; let i = index"
+        (click)="openGallery(i)"
+      >
+        <img [src]="img" alt="Room Photo" onerror="this.src = 'assets/images/default-room.jpg'" />
+
+        <button class="view-all-photos" *ngIf="i === 4 && room.images.length > 5">
+          <i class="fas fa-th"></i> Xem {{ room.images.length }} Ảnh
+        </button>
+      </div>
+    </div>
+
+    <div class="d-grid gap-5" style="grid-template-columns: 2fr 1fr">
+      <div>
+        <div class="d-flex gap-4 pb-4 border-bottom mb-4 flex-wrap">
+          <div>
+            <div class="text-muted text-sm">Diện tích</div>
+            <div class="font-bold">
+              <i class="fas fa-vector-square text-primary"></i> {{ room.area }}m²
+            </div>
+          </div>
+          <div>
+            <div class="text-muted text-sm">Loại giường</div>
+            <div class="font-bold">
+              <i class="fas fa-bed text-primary"></i> {{ room.bedType || 'Tiêu chuẩn' }}
+            </div>
+          </div>
+          <div>
+            <div class="text-muted text-sm">Phòng tắm</div>
+            <div class="font-bold">
+              <i class="fas fa-bath text-primary"></i> {{ room.bathCount }} phòng
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-5">
+          <h3 class="font-bold mb-3">Mô tả chi tiết từ chủ nhà</h3>
+          <div class="text-main" style="line-height: 1.7; white-space: pre-wrap">
+            {{ room.description }}
+          </div>
+        </div>
+
+        <div class="mb-5">
+          <h3 class="font-bold mb-3">Tiện ích cơ bản</h3>
+          <div class="d-grid grid-cols-2 gap-x-4">
+            <div class="amenity-item">
+              <div class="amenity-icon"><i class="fas fa-snowflake"></i></div>
+              <span class="font-medium">Điều hòa</span>
+            </div>
+            <div class="amenity-item">
+              <div class="amenity-icon"><i class="fas fa-bed"></i></div>
+              <span class="font-medium">Giường đệm</span>
+            </div>
+            <div class="amenity-item">
+              <div class="amenity-icon"><i class="fas fa-door-closed"></i></div>
+              <span class="font-medium">Tủ quần áo</span>
+            </div>
+            <div class="amenity-item">
+              <div class="amenity-icon"><i class="fas fa-wifi"></i></div>
+              <span class="font-medium">Wifi tốc độ cao</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <aside>
+        <div class="sticky-booking-card">
+          <div class="mb-4 text-center">
+            <span class="text-muted">Giá thuê</span>
+            <div class="text-primary font-bold" style="font-size: 2rem">
+              {{ room.basePrice | number }}đ<span
+                class="text-muted"
+                style="font-size: 1rem; font-weight: normal"
+                >/tháng</span
+              >
+            </div>
+          </div>
+
+          <div class="bg-alt p-3 rounded mb-4" *ngIf="room.services?.length > 0">
+            <h4 class="font-semibold mb-2 text-sm">Phí dịch vụ khác:</h4>
+            @for (srv of room.services; track srv.serviceName) {
+              <div class="d-flex justify-content-between mb-1 text-sm">
+                <span class="text-muted">{{ srv.serviceName }}</span>
+                <span>{{ srv.price | number }}đ / {{ srv.unit }}</span>
+              </div>
+            }
+          </div>
+
+          <div class="d-flex align-items-center gap-3 mb-4 p-3 border rounded">
+            <img
+              [src]="
+                'https://ui-avatars.com/api/?name=' +
+                room.landlordName +
+                '&background=0F52BA&color=fff'
+              "
+              style="width: 50px; height: 50px; border-radius: 50%"
+            />
+            <div>
+              <div class="font-semibold">{{ room.landlordName }}</div>
+              <div class="text-success" style="font-size: 0.8rem">
+                <i class="fas fa-check-circle"></i> Chủ nhà xác thực
+              </div>
+            </div>
+          </div>
+
+          <button
+            class="btn btn-primary btn-block btn-lg mb-2"
+            (click)="openBookingModal()"
+            [disabled]="room.status !== 'AVAILABLE'"
+          >
+            <i class="fas fa-paper-plane"></i>
+            {{ room.status === 'AVAILABLE' ? 'Gửi Yêu Cầu Thuê' : 'Phòng đã có người thuê' }}
+          </button>
+          <a
+            [href]="'https://zalo.me/' + room.landlordPhone"
+            target="_blank"
+            class="btn btn-outline btn-block btn-lg"
+            style="color: #10b981; border-color: #10b981"
+          >
+            <i class="fas fa-phone-alt"></i> Chat zalo Chủ Nhà
+          </a>
+        </div>
+      </aside>
+    </div>
+  </div>
+</main>
+
+<div class="rn-modal-overlay" *ngIf="isBookingModalOpen && room">
+  <div class="rn-modal" style="max-width: 560px">
+    <div class="modal-header">
+      <h3 class="modal-title">
+        <i class="fas fa-paper-plane text-primary" style="margin-right: 8px"></i>Gửi Yêu Cầu Thuê
+        Phòng
+      </h3>
+      <button class="modal-close" (click)="closeBookingModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div
+        class="d-flex align-items-center gap-3 mb-4 p-3 rounded"
+        style="background: rgba(15, 82, 186, 0.06); border: 1px solid rgba(15, 82, 186, 0.1)"
+      >
+        <img
+          [src]="room.images[0]"
+          onerror="this.src = 'assets/images/default-room.jpg'"
+          style="width: 60px; height: 60px; border-radius: 8px; object-fit: cover"
+        />
+        <div>
+          <div class="font-semibold">{{ room.roomName }}</div>
+          <div class="text-primary font-bold">
+            {{ room.basePrice | number }}đ<span class="text-muted text-sm">/tháng</span>
+          </div>
+        </div>
+      </div>
+
+      <form (ngSubmit)="submitBooking()" #bookingNgForm="ngForm">
+        <div class="d-grid grid-cols-2 gap-3 mb-3">
+          <div class="form-group mb-0">
+            <label class="form-label">Họ và Tên <span class="text-danger">*</span></label>
+            <input
+              type="text"
+              class="form-control"
+              name="fullName"
+              [(ngModel)]="bookingForm.fullName"
+              placeholder="Nguyễn Văn A"
+              required
+            />
+          </div>
+          <div class="form-group mb-0">
+            <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+            <input
+              type="tel"
+              class="form-control"
+              name="phone"
+              [(ngModel)]="bookingForm.phone"
+              placeholder="0987 123 456"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="d-grid grid-cols-2 gap-3 mb-3">
+          <div class="form-group mb-0">
+            <label class="form-label">CMND / CCCD <span class="text-danger">*</span></label>
+            <input
+              type="text"
+              class="form-control"
+              name="cccd"
+              [(ngModel)]="bookingForm.cccd"
+              placeholder="001099012345"
+              required
+            />
+          </div>
+          <div class="form-group mb-0">
+            <label class="form-label">Email <span class="text-danger">*</span></label>
+            <input
+              type="email"
+              class="form-control"
+              name="email"
+              [(ngModel)]="bookingForm.email"
+              placeholder="email@gmail.com"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="form-group mb-3">
+          <label class="form-label">Ngày muốn dọn vào <span class="text-danger">*</span></label>
+          <input
+            type="date"
+            class="form-control"
+            name="moveInDate"
+            [(ngModel)]="bookingForm.moveInDate"
+            required
+          />
+        </div>
+
+        <div class="form-group mb-3">
+          <label class="form-label">Lời nhắn cho Chủ nhà</label>
+          <textarea
+            class="form-control"
+            name="message"
+            [(ngModel)]="bookingForm.message"
+            rows="3"
+            placeholder="VD: Em muốn thuê dài hạn, hiện tại đang là sinh viên năm 3..."
+          ></textarea>
+        </div>
+
+        <div
+          class="p-3 rounded mb-3"
+          style="
+            background: rgba(245, 158, 11, 0.08);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: var(--radius-md);
+          "
+        >
+          <div class="d-flex align-items-center gap-2">
+            <i class="fas fa-info-circle text-warning"></i>
+            <span class="text-sm"
+              >Bạn sẽ <strong>không bị trừ tiền</strong> khi gửi yêu cầu. Tiền cọc chỉ thanh toán
+              sau khi chủ nhà duyệt và bạn ký hợp đồng.</span
+            >
+          </div>
+        </div>
+
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-outline flex-1" (click)="closeBookingModal()">
+            Hủy bỏ
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            style="flex: 2"
+            [disabled]="bookingNgForm.invalid"
+          >
+            <i class="fas fa-paper-plane"></i> Gửi Yêu Cầu Thuê
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div class="lightbox-overlay" *ngIf="isGalleryOpen" (click)="closeGallery()">
+  <button class="lightbox-close" (click)="closeGallery()">
+    <i class="fas fa-times"></i>
+  </button>
+
+  <div class="lightbox-counter">{{ currentImageIndex + 1 }} / {{ room.images.length }}</div>
+
+  <button class="lightbox-nav btn-prev" (click)="prevImage($event)" *ngIf="room.images.length > 1">
+    <i class="fas fa-chevron-left"></i>
+  </button>
+
+  <button class="lightbox-nav btn-next" (click)="nextImage($event)" *ngIf="room.images.length > 1">
+    <i class="fas fa-chevron-right"></i>
+  </button>
+
+  <div class="lightbox-content" (click)="$event.stopPropagation()">
+    <img
+      [src]="room.images[currentImageIndex]"
+      alt="Phóng to"
+      class="lightbox-img"
+      onerror="this.src = 'assets/images/default-room.jpg'"
+    />
+  </div>
+</div>
