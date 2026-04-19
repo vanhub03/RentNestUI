@@ -1,0 +1,202 @@
+<div class="admin-content">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="m-0 font-semibold" style="font-size: 1.5rem">Yêu Cầu Thuê Phòng</h2>
+  </div>
+
+  <div class="request-stats">
+    <div class="request-stat-card">
+      <div class="stat-icon-sm" style="background: rgba(59, 130, 246, 0.1); color: var(--info)">
+        <i class="fas fa-layer-group"></i>
+      </div>
+      <div>
+        <div class="stat-number">{{ stats.total }}</div>
+        <div class="stat-desc">Tổng yêu cầu</div>
+      </div>
+    </div>
+    <div class="request-stat-card">
+      <div class="stat-icon-sm" style="background: rgba(245, 158, 11, 0.1); color: var(--warning)">
+        <i class="fas fa-clock"></i>
+      </div>
+      <div>
+        <div class="stat-number text-warning">{{ stats.pending }}</div>
+        <div class="stat-desc">Đang chờ duyệt</div>
+      </div>
+    </div>
+    <div class="request-stat-card">
+      <div class="stat-icon-sm" style="background: rgba(16, 185, 129, 0.1); color: var(--success)">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <div>
+        <div class="stat-number text-success">{{ stats.approved }}</div>
+        <div class="stat-desc">Đã duyệt</div>
+      </div>
+    </div>
+    <div class="request-stat-card">
+      <div class="stat-icon-sm" style="background: rgba(239, 68, 68, 0.1); color: var(--danger)">
+        <i class="fas fa-times-circle"></i>
+      </div>
+      <div>
+        <div class="stat-number text-danger">{{ stats.rejected }}</div>
+        <div class="stat-desc">Đã từ chối</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card p-0 mb-4 shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+      <div class="d-flex gap-3">
+        <select
+          class="form-control form-control-sm"
+          style="width: 160px"
+          [(ngModel)]="filter.status"
+          (change)="onFilterChange()"
+        >
+          <option value="">Tất cả trạng thái</option>
+          <option value="PENDING">Đang chờ duyệt</option>
+          <option value="APPROVED">Đã duyệt</option>
+          <option value="REJECTED">Đã từ chối</option>
+        </select>
+
+        <select
+          class="form-control form-control-sm"
+          style="width: 160px"
+          [(ngModel)]="filter.roomId"
+          (change)="onFilterChange()"
+        >
+          <option value="">Tất cả phòng</option>
+          <option value="1">P.102</option>
+          <option value="2">P.201</option>
+        </select>
+
+        <input
+          type="text"
+          class="form-control form-control-sm"
+          placeholder="Tìm tên khách..."
+          style="width: 200px"
+          [(ngModel)]="filter.tenantName"
+          (keyup.enter)="onFilterChange()"
+        />
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Mã YC</th>
+            <th>Khách Hàng</th>
+            <th>Phòng Yêu Cầu</th>
+            <th>Ngày Dọn Vào</th>
+            <th>Ngày Gửi</th>
+            <th>Trạng Thái</th>
+            <th class="text-right">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="isLoading">
+            <td colspan="7" class="text-center py-4">Đang tải dữ liệu...</td>
+          </tr>
+          <tr *ngIf="!isLoading && requests.length === 0">
+            <td colspan="7" class="text-center py-4">Không có yêu cầu nào.</td>
+          </tr>
+
+          @for (req of requests; track req.id) {
+            <tr [style.opacity]="req.status === 'REJECTED' ? '0.65' : '1'">
+              <td class="font-medium text-primary">#YC-{{ req.id | number: '3.0' }}</td>
+              <td>
+                <div class="tenant-cell">
+                  <img
+                    [src]="
+                      'https://ui-avatars.com/api/?name=' +
+                      req.tenantName +
+                      '&background=random&color=fff'
+                    "
+                    class="tenant-avatar"
+                    alt=""
+                  />
+                  <div>
+                    <div class="tenant-name">{{ req.tenantName }}</div>
+                    <div class="tenant-phone">{{ req.tenantPhone }}</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <a href="javascript:void(0)" class="text-primary font-medium">{{ req.roomName }}</a>
+                <div class="text-xs text-muted">{{ req.hostelAddress }}</div>
+              </td>
+              <td>{{ req.expectedMoveInDate | date: 'dd/MM/yyyy' }}</td>
+              <td>
+                <div>{{ req.createdAt | date: 'dd/MM/yyyy' }}</div>
+                <div class="time-ago">{{ getTimeAgo(req.createdAt) }}</div>
+              </td>
+              <td>
+                <span
+                  class="badge"
+                  [class.badge-pending]="req.status === 'PENDING'"
+                  [class.badge-approved]="req.status === 'APPROVED'"
+                  [class.badge-rejected]="req.status === 'REJECTED'"
+                >
+                  {{
+                    req.status === 'PENDING'
+                      ? 'Đang chờ'
+                      : req.status === 'APPROVED'
+                        ? 'Đã duyệt'
+                        : 'Từ chối'
+                  }}
+                </span>
+              </td>
+              <td class="text-right">
+                <div class="action-group" style="justify-content: flex-end">
+                  <button
+                    class="btn btn-sm btn-outline"
+                    (click)="updateStatus(req.id, 'detail')"
+                    title="Xem"
+                  >
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button
+                    *ngIf="req.status === 'PENDING'"
+                    class="btn-approve"
+                    (click)="updateStatus(req.id, 'APPROVED')"
+                    title="Duyệt"
+                  >
+                    <i class="fas fa-check"></i> Duyệt
+                  </button>
+                  <button
+                    *ngIf="req.status === 'PENDING'"
+                    class="btn-reject"
+                    (click)="updateStatus(req.id, 'REJECTED')"
+                    title="Từ chối"
+                  >
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div
+      class="card-footer d-flex justify-content-between align-items-center bg-transparent"
+      *ngIf="totalPages > 1"
+    >
+      <span class="text-sm text-muted">Trang {{ filter.page + 1 }} / {{ totalPages }}</span>
+      <ul class="pagination m-0">
+        <li class="page-item" [class.disabled]="filter.page === 0">
+          <a class="page-link cursor-pointer" (click)="changePage(filter.page - 1)"
+            ><i class="fas fa-chevron-left"></i
+          ></a>
+        </li>
+        <li class="page-item active">
+          <a class="page-link">{{ filter.page + 1 }}</a>
+        </li>
+        <li class="page-item" [class.disabled]="filter.page >= totalPages - 1">
+          <a class="page-link cursor-pointer" (click)="changePage(filter.page + 1)"
+            ><i class="fas fa-chevron-right"></i
+          ></a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

@@ -9,6 +9,7 @@ import { LandlordTenantsComponent } from './landlord/tenants/tenants.component';
 import { AddTenantComponent } from './landlord/add-tenants/add-tenant.component';
 import { PublicRoomsComponent } from './rooms/rooms.component';
 import { RoomDetailComponent } from './room-detail/room-detail.component';
+import { RentalRequests } from './landlord/rental-requests/rental-requests.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -20,6 +21,7 @@ export const routes: Routes = [
       { path: 'rooms', component: LandLordRoomsComponent },
       { path: 'tenants', component: LandlordTenantsComponent },
       { path: 'add-tenant', component: AddTenantComponent },
+      { path: 'rental-requests', component: RentalRequests },
       { path: '', redirectTo: 'rooms', pathMatch: 'full' },
     ],
   },

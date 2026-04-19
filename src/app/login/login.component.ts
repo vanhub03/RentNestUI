@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../_services/auth.service';
 import { ToastrService } from 'ngx-toastr';
 import { StorageService } from '../_services/storage.service';
@@ -12,18 +12,27 @@ import { StorageService } from '../_services/storage.service';
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   form: any = {
     username: '',
     password: '',
     rememberMe: false,
   };
+  returnUrl!: string;
   constructor(
     private authService: AuthService,
     private toastr: ToastrService,
     private storageService: StorageService,
     private router: Router,
+    private route: ActivatedRoute,
   ) {}
+  ngOnInit(): void {
+    this.route.queryParams.subscribe((params) => {
+      if (params['returnUrl']) {
+        this.returnUrl = params['returnUrl'];
+      }
+    });
+  }
   showPassword = false;
   togglePassword(): void {
     this.showPassword = !this.showPassword;
@@ -43,7 +52,11 @@ export class LoginComponent {
         if (data.roles && data.roles.includes('ADMIN')) {
           this.router.navigate(['/admin/dashboard']);
         } else {
-          this.router.navigate(['/home']);
+          if (this.returnUrl) {
+            this.router.navigateByUrl(this.returnUrl);
+          } else {
+            this.router.navigate(['/home']);
+          }
         }
       },
       error: (err) => {
