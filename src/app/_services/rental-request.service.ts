@@ -19,4 +19,13 @@ export class RentalRequestService {
     if (filter.tenantName) params = params.set('tenantName', filter.tenantName);
     return this.http.get(enviroment.apiUrl + '/landlord/rental-requests', { params });
   }
+  getRequestDetail(id: number): Observable<any> {
+    return this.http.get(`${enviroment.apiUrl}/landlord/rental-requests/${id}`);
+  }
+  updateStatus(id: number, status: String, rejectReason?: string): Observable<any> {
+    return this.http.post(`${enviroment.apiUrl}/landlord/rental-requests/${id}/status`, {
+      status,
+      rejectReason,
+    });
+  }
 }

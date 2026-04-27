@@ -136,3 +136,23 @@
     grid-template-columns: 1fr;
   }
 }
+
+.reject-request-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  background: var(--bg-alt);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+}
+
+.reject-confirm-btn {
+  background: var(--danger);
+  color: white;
+}
+
+.reject-confirm-btn:hover:not(:disabled) {
+  background: #dc2626;
+}

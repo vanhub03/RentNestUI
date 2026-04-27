@@ -64,8 +64,7 @@
           (change)="onFilterChange()"
         >
           <option value="">Tất cả phòng</option>
-          <option value="1">P.102</option>
-          <option value="2">P.201</option>
+          <option *ngFor="let room of rooms" [ngValue]="room.id">{{ room.roomName }}</option>
         </select>
 
         <input
@@ -148,7 +147,7 @@
                 <div class="action-group" style="justify-content: flex-end">
                   <button
                     class="btn btn-sm btn-outline"
-                    (click)="updateStatus(req.id, 'detail')"
+                    [routerLink]="['/landlord/rental-request', req.id]"
                     title="Xem"
                   >
                     <i class="fas fa-eye"></i>
@@ -164,7 +163,7 @@
                   <button
                     *ngIf="req.status === 'PENDING'"
                     class="btn-reject"
-                    (click)="updateStatus(req.id, 'REJECTED')"
+                    (click)="openRejectModal(req)"
                     title="Từ chối"
                   >
                     <i class="fas fa-times"></i>
@@ -197,6 +196,70 @@
           ></a>
         </li>
       </ul>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" [class.active]="isRejectModalOpen">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title"><i class="fas fa-times-circle text-danger"></i> Từ chối yêu cầu</h3>
+      <button class="modal-close" [disabled]="isSubmittingReject" (click)="closeRejectModal()">
+        &times;
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group" *ngIf="selectedRejectRequest">
+        <label class="form-label">Yêu cầu</label>
+        <div class="reject-request-summary">
+          <strong>#YC-{{ selectedRejectRequest.id | number: '3.0' }}</strong>
+          <span>{{ selectedRejectRequest.tenantName }} - {{ selectedRejectRequest.roomName }}</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Lý do từ chối <span class="text-danger">*</span></label>
+        <select
+          class="form-control"
+          [(ngModel)]="rejectForm.reason"
+          [disabled]="isSubmittingReject"
+        >
+          <option value="">-- Chọn lý do --</option>
+          @for (reason of rejectReasons; track reason) {
+            <option [value]="reason">{{ reason }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Ghi chú thêm</label>
+        <textarea
+          class="form-control"
+          rows="3"
+          [(ngModel)]="rejectForm.note"
+          [disabled]="isSubmittingReject"
+          placeholder="Nhập thêm thông tin để khách thuê hiểu lý do..."
+        ></textarea>
+      </div>
+
+      <div class="d-flex gap-2 mt-3">
+        <button
+          type="button"
+          class="btn btn-outline flex-1"
+          [disabled]="isSubmittingReject"
+          (click)="closeRejectModal()"
+        >
+          Hủy
+        </button>
+        <button
+          type="button"
+          class="btn reject-confirm-btn flex-1"
+          [disabled]="isSubmittingReject"
+          (click)="submitReject()"
+        >
+          <i class="fas fa-times"></i>
+          {{ isSubmittingReject ? 'Đang xử lý...' : 'Xác nhận từ chối' }}
+        </button>
+      </div>
     </div>
   </div>
 </div>
