@@ -1,0 +1,209 @@
+<div class="admin-content request-detail-page">
+  <div *ngIf="isLoading" class="card p-4 text-center">Đang tải chi tiết yêu cầu...</div>
+
+  <ng-container *ngIf="!isLoading && request">
+    <div class="detail-header">
+      <div class="d-flex align-items-center gap-3">
+        <a [routerLink]="['/landlord/rental-requests']" class="btn btn-icon back-button">
+          <i class="fas fa-arrow-left"></i>
+        </a>
+        <div>
+          <h2 class="m-0 font-semibold detail-title">
+            Chi Tiết Yêu Cầu <span class="text-primary">#YC-{{ request.id | number: '3.0' }}</span>
+          </h2>
+        </div>
+      </div>
+      <div>
+        <span class="timeline-badge" [ngClass]="statusClass">
+          <i [class]="getStatusIcon(request.status)"></i> {{ getStatusLabel(request.status) }}
+        </span>
+      </div>
+    </div>
+
+    <div class="detail-layout">
+      <div>
+        <div class="profile-card mb-4">
+          <div class="profile-header">
+            <img [src]="avatarUrl" class="profile-avatar" alt="Avatar" />
+            <div class="profile-name">{{ request.tenantName }}</div>
+            <div class="profile-subtitle">Khách thuê đang quan tâm phòng của bạn</div>
+            <div class="profile-badges">
+              <span class="profile-badge"> <i class="fas fa-shield-alt"></i> Đã xác minh SĐT </span>
+              <span class="profile-badge" *ngIf="request.cccd">
+                <i class="fas fa-id-card"></i> Có CCCD
+              </span>
+            </div>
+          </div>
+
+          <div class="info-list">
+            <div class="info-item">
+              <div class="info-icon"><i class="fas fa-phone"></i></div>
+              <div>
+                <div class="info-label">Số điện thoại</div>
+                <div class="info-value">{{ request.tenantPhone || 'Chưa cập nhật' }}</div>
+              </div>
+            </div>
+            <div class="info-item">
+              <div class="info-icon"><i class="fas fa-id-card"></i></div>
+              <div>
+                <div class="info-label">CMND / CCCD</div>
+                <div class="info-value">{{ request.cccd || 'Chưa cung cấp' }}</div>
+              </div>
+            </div>
+            <div class="info-item">
+              <div class="info-icon"><i class="fas fa-envelope"></i></div>
+              <div>
+                <div class="info-label">Email</div>
+                <div class="info-value">{{ request.tenantEmail || 'Chưa cập nhật' }}</div>
+              </div>
+            </div>
+            <div class="info-item">
+              <div class="info-icon"><i class="fas fa-calendar-alt"></i></div>
+              <div>
+                <div class="info-label">Ngày muốn dọn vào</div>
+                <div class="info-value text-primary font-bold">
+                  {{ request.expectedMoveInDate | date: 'dd/MM/yyyy' }}
+                </div>
+              </div>
+            </div>
+            <div class="info-item">
+              <div class="info-icon"><i class="fas fa-clock"></i></div>
+              <div>
+                <div class="info-label">Ngày gửi yêu cầu</div>
+                <div class="info-value">{{ request.createdAt | date: 'dd/MM/yyyy' }}</div>
+              </div>
+            </div>
+            <div class="info-item" *ngIf="request.rejectReason">
+              <div class="info-icon"><i class="fas fa-comment-slash"></i></div>
+              <div>
+                <div class="info-label">Lý do từ chối</div>
+                <div class="info-value">{{ request.rejectReason }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card p-4">
+          <h4 class="font-semibold mb-3 section-title">
+            <i class="fas fa-comment-dots text-primary"></i> Lời nhắn từ khách
+          </h4>
+          <div class="message-box">
+            <p>{{ request.note || 'Khách thuê chưa để lại lời nhắn.' }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="room-summary-card">
+          <img [src]="roomImage" class="room-summary-img" alt="Room" />
+          <div class="room-summary-body">
+            <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+              <span class="badge badge-info text-white">
+                {{ request.roomStatus === 'AVAILABLE' ? 'Trống' : 'Đã cập nhật' }}
+              </span>
+              <span class="badge badge-secondary">{{ request.hostelName }}</span>
+            </div>
+            <h3 class="font-bold m-0 room-name">{{ request.roomName }}</h3>
+            <p class="text-muted mt-1 mb-0 room-address">
+              <i class="fas fa-map-marker-alt"></i> {{ request.hostelAddress }}
+            </p>
+
+            <div class="text-primary font-bold mt-3 room-price">
+              {{ request.depositAmount | number: '1.0-0' }}đ
+              <span class="text-muted room-price-unit">/tháng</span>
+            </div>
+
+            <div class="room-meta">
+              <div class="room-meta-item">
+                <div class="room-meta-value">{{ request.roomArea || 0 }}m²</div>
+                <div class="room-meta-label">Diện tích</div>
+              </div>
+              <div class="room-meta-item">
+                <div class="room-meta-value">Tầng {{ request.roomFloor || 0 }}</div>
+                <div class="room-meta-label">Vị trí</div>
+              </div>
+              <div class="room-meta-item">
+                <div class="room-meta-value">{{ request.bathCount || 0 }}</div>
+                <div class="room-meta-label">Phòng tắm</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="action-buttons" *ngIf="canReview">
+            <button class="btn-approve-lg" (click)="approveRequest(this.requestId, 'APPROVED')">
+              <i class="fas fa-check-circle"></i> Duyệt Yêu Cầu & Tạo Hợp Đồng
+            </button>
+            <button class="btn-reject-lg" (click)="openRejectModal()">
+              <i class="fas fa-times-circle"></i> Từ Chối Yêu Cầu
+            </button>
+            <p class="text-center text-muted m-0 helper-text">
+              Sau khi duyệt, yêu cầu sẽ chuyển sang trạng thái đã duyệt để tenant tiếp tục bước tiếp
+              theo.
+            </p>
+          </div>
+
+          <div class="action-buttons" *ngIf="!canReview">
+            <a class="btn btn-outline btn-lg" [routerLink]="['/landlord/rental-requests']">
+              Quay lại danh sách
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>
+
+<div class="modal-overlay" [class.active]="isApproveSuccessOpen">
+  <div class="modal success-modal">
+    <div class="success-icon">
+      <i class="fas fa-file-contract"></i>
+    </div>
+    <h3 class="font-bold mb-2 success-title">Đã Duyệt Yêu Cầu!</h3>
+    <p class="text-muted mb-4 success-copy">
+      Yêu cầu thuê đã được cập nhật thành công. Tenant sẽ nhìn thấy trạng thái mới trong trang "Yêu
+      cầu của tôi".
+    </p>
+    <div class="d-flex flex-column gap-2">
+      <button type="button" class="btn btn-primary btn-lg" (click)="closeApproveSuccess()">
+        Quay lại danh sách
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" [class.active]="isRejectModalOpen">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title"><i class="fas fa-times-circle text-danger"></i> Từ Chối Yêu Cầu</h3>
+      <button class="modal-close" (click)="closeRejectModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Lý do từ chối <span class="text-danger">*</span></label>
+        <select class="form-control" [(ngModel)]="rejectForm.reason">
+          <option value="">-- Chọn lý do --</option>
+          @for (reason of rejectReasons; track reason) {
+            <option [value]="reason">{{ reason }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ghi chú thêm (tùy chọn)</label>
+        <textarea
+          class="form-control"
+          rows="3"
+          [(ngModel)]="rejectForm.note"
+          placeholder="VD: Phòng này đã có khách đặt trước, mời bạn xem phòng khác..."
+        ></textarea>
+      </div>
+      <div class="d-flex gap-2 mt-3">
+        <button type="button" class="btn btn-outline flex-1" (click)="closeRejectModal()">
+          Hủy
+        </button>
+        <button type="button" class="btn reject-confirm-btn flex-1" (click)="submitReject()">
+          <i class="fas fa-times"></i> Xác Nhận Từ Chối
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

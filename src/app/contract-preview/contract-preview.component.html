@@ -1,0 +1,258 @@
+<div [class.admin-content]="isLandlord" class="contract-page">
+  <div *ngIf="isLoading" class="card p-4 text-center">Đang tải hợp đồng nháp...</div>
+
+  <ng-container *ngIf="!isLoading && contract">
+    <div class="contract-topbar" *ngIf="isLandlord">
+      <div class="d-flex align-items-center gap-3">
+        <a [routerLink]="backLink" class="btn btn-icon back-button">
+          <i class="fas fa-arrow-left"></i>
+        </a>
+        <h2 class="m-0 font-semibold topbar-title">
+          Hợp đồng nháp của YC-{{ contract.rentalRequestId | number: '3.0' }}
+        </h2>
+      </div>
+    </div>
+
+    <main [class.py-4]="!isLandlord">
+      <div class="container">
+        <div class="contract-wrapper">
+          <div class="contract-status-bar">
+            <div class="status-left">
+              <div class="status-icon">
+                <i [class]="isLandlord ? 'fas fa-paper-plane' : 'fas fa-file-alt'"></i>
+              </div>
+              <div>
+                <div class="font-semibold">Hợp đồng nháp #{{ contract.contractCode }}</div>
+                <div class="text-muted text-sm">
+                  {{
+                    isLandlord
+                      ? 'Hệ thống đã tự động tạo và gửi cho khách lúc '
+                      : 'Được tạo tự động bởi hệ thống lúc '
+                  }}
+                  {{ contract.createdAt | date: 'HH:mm, dd/MM/yyyy' }}
+                </div>
+              </div>
+            </div>
+            <span class="badge badge-warning text-white contract-status-badge" style="color: white">
+              <i [class]="isLandlord ? 'fas fa-hourglass-half' : 'fas fa-pen'"></i>
+              {{ statusLabel }}
+            </span>
+          </div>
+
+          <div class="contract-doc">
+            <div class="contract-doc-header">
+              <div class="country-title">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
+              <div class="country-subtitle">Độc lập - Tự do - Hạnh phúc</div>
+              <h2>HỢP ĐỒNG THUÊ PHÒNG TRỌ</h2>
+              <p>
+                Số: {{ contract.contractCode }} · Ngày lập:
+                {{ contract.createdAt | date: 'dd/MM/yyyy' }}
+              </p>
+            </div>
+
+            <div class="contract-body">
+              <div class="contract-section">
+                <div class="contract-section-title">
+                  <i class="fas fa-user-tie"></i> BÊN A - Bên cho thuê (Chủ nhà)
+                </div>
+                <table class="contract-table">
+                  <tr>
+                    <td>Họ và tên</td>
+                    <td>{{ contract.landlordName || 'Chưa cập nhật' }}</td>
+                  </tr>
+                  <tr>
+                    <td>Số điện thoại</td>
+                    <td>{{ contract.landlordPhone || 'Chưa cập nhật' }}</td>
+                  </tr>
+                  <tr>
+                    <td>Địa chỉ</td>
+                    <td>{{ contract.landlordAddress || contract.hostelAddress }}</td>
+                  </tr>
+                </table>
+              </div>
+
+              <div class="contract-section">
+                <div class="contract-section-title">
+                  <i class="fas fa-user"></i> BÊN B - Bên thuê (Khách)
+                </div>
+                <table class="contract-table">
+                  <tr>
+                    <td>Họ và tên</td>
+                    <td>{{ contract.tenantName }}</td>
+                  </tr>
+                  <tr>
+                    <td>CMND/CCCD</td>
+                    <td>{{ contract.tenantIdentityCard || 'Chưa cung cấp' }}</td>
+                  </tr>
+                  <tr>
+                    <td>Số điện thoại</td>
+                    <td>{{ contract.tenantPhone || 'Chưa cập nhật' }}</td>
+                  </tr>
+                  <tr>
+                    <td>Email</td>
+                    <td>{{ contract.tenantEmail || 'Chưa cập nhật' }}</td>
+                  </tr>
+                </table>
+              </div>
+
+              <div class="contract-section">
+                <div class="contract-section-title">
+                  <i class="fas fa-door-open"></i> Thông tin phòng thuê
+                </div>
+                <table class="contract-table">
+                  <tr>
+                    <td>Phòng</td>
+                    <td class="text-primary font-bold">{{ contract.roomName }}</td>
+                  </tr>
+                  <tr>
+                    <td>Cơ sở</td>
+                    <td>{{ contract.hostelName }} - {{ contract.hostelAddress }}</td>
+                  </tr>
+                  <tr>
+                    <td>Diện tích</td>
+                    <td>{{ contract.roomArea || 0 }}m²</td>
+                  </tr>
+                  <tr>
+                    <td>Giá thuê</td>
+                    <td class="price-highlight rent-price">
+                      {{ contract.monthlyRent | number: '1.0-0' }}đ / tháng
+                    </td>
+                  </tr>
+                </table>
+              </div>
+
+              <div class="contract-section">
+                <div class="contract-section-title">
+                  <i class="fas fa-money-bill-wave"></i> Chi phí & thời hạn
+                </div>
+                <table class="contract-table">
+                  <tr>
+                    <td>Tiền cọc</td>
+                    <td class="font-bold text-success">
+                      {{ contract.depositAmount | number: '1.0-0' }}đ (1 tháng tiền phòng)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Thời hạn hợp đồng</td>
+                    <td>
+                      {{ contract.durationMonths }} tháng ({{
+                        contract.startDate | date: 'dd/MM/yyyy'
+                      }}
+                      - {{ contract.endDate | date: 'dd/MM/yyyy' }})
+                    </td>
+                  </tr>
+                  @for (service of contract.services || []; track service.id) {
+                    <tr>
+                      <td>{{ service.serviceName }}</td>
+                      <td>
+                        {{ service.unitPrice | number: '1.0-0' }}đ
+                        <ng-container *ngIf="service.unitName">
+                          / {{ service.unitName }}</ng-container
+                        >
+                      </td>
+                    </tr>
+                  }
+                  <tr>
+                    <td>Ngày thanh toán</td>
+                    <td>Ngày {{ contract.paymentDay | number: '2.0' }} hàng tháng</td>
+                  </tr>
+                </table>
+              </div>
+
+              <div class="contract-section">
+                <div class="contract-section-title">
+                  <i class="fas fa-gavel"></i> Điều khoản hợp đồng
+                </div>
+                <div class="terms-content">
+                  <ol>
+                    <li>
+                      <strong>Thanh toán tiền thuê:</strong> Bên B phải thanh toán tiền thuê phòng
+                      đầy đủ, đúng hạn vào ngày {{ contract.paymentDay | number: '2.0' }} hàng
+                      tháng. Nếu chậm quá 07 ngày, Bên B sẽ phải chịu phí phạt 50.000đ/ngày.
+                    </li>
+                    <li>
+                      <strong>Tiền cọc:</strong> Tiền đặt cọc sẽ được hoàn trả khi kết thúc hợp
+                      đồng, sau khi trừ các khoản nợ, hư hại nếu có. Bên B phải báo trước ít nhất 30
+                      ngày trước khi hết hợp đồng.
+                    </li>
+                    <li>
+                      <strong>Sử dụng phòng:</strong> Bên B chỉ được sử dụng phòng đúng mục đích ở.
+                      Không được dùng để kinh doanh, chứa hàng hóa cấm, hoặc các hoạt động vi phạm
+                      pháp luật.
+                    </li>
+                    <li>
+                      <strong>Giữ gìn vệ sinh:</strong> Bên B có trách nhiệm giữ gìn vệ sinh chung,
+                      không gây ồn ào ảnh hưởng đến các phòng xung quanh sau 23h00.
+                    </li>
+                    <li>
+                      <strong>Sửa chữa & bảo dưỡng:</strong> Những hư hỏng do Bên B gây ra, Bên B
+                      phải chịu chi phí sửa chữa. Những hư hỏng tự nhiên sẽ do Bên A chịu.
+                    </li>
+                    <li>
+                      <strong>Chấm dứt hợp đồng:</strong> Nếu một trong hai bên muốn chấm dứt hợp
+                      đồng trước thời hạn, phải thông báo trước ít nhất 30 ngày bằng văn bản.
+                    </li>
+                    <li>
+                      <strong>An ninh:</strong> Bên B phải tuân thủ nội quy khu nhà trọ, đăng ký tạm
+                      trú theo quy định, và phối hợp với Bên A trong các vấn đề an ninh.
+                    </li>
+                  </ol>
+                </div>
+              </div>
+
+              <div class="signature-area" *ngIf="!isLandlord">
+                <label class="checkbox-custom">
+                  <input type="checkbox" [(ngModel)]="hasAgreed" />
+                  <div>
+                    <div class="font-semibold agreement-title">
+                      Tôi đã đọc, hiểu rõ và đồng ý với tất cả các điều khoản trong hợp đồng trên.
+                    </div>
+                    <div class="text-muted text-sm mt-1">
+                      Bằng việc tích chọn, bạn xác nhận đã xem xét kỹ lưỡng nội dung hợp đồng trước
+                      khi chuyển sang thanh toán cọc.
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div class="contract-footer-actions" *ngIf="isLandlord">
+              <div class="d-flex gap-2 flex-wrap">
+                <button class="btn btn-outline border-color" disabled>
+                  <i class="fas fa-edit"></i> Sửa hợp đồng
+                </button>
+                <button class="btn btn-outline border-color" (click)="printContract()">
+                  <i class="fas fa-print"></i> In PDF
+                </button>
+              </div>
+              <button class="btn btn-primary" (click)="remindTenant()">
+                <i class="fas fa-paper-plane"></i> Nhắc khách thanh toán cọc
+              </button>
+            </div>
+
+            <div class="contract-footer-actions" *ngIf="!isLandlord">
+              <div>
+                <div class="text-muted text-sm">Tổng cần thanh toán (Cọc)</div>
+                <div class="price-highlight footer-price">
+                  {{ contract.depositAmount | number: '1.0-0' }}đ
+                </div>
+              </div>
+              <div class="d-flex gap-2 flex-wrap">
+                <button class="btn btn-outline border-color" (click)="printContract()">
+                  <i class="fas fa-download"></i> Tải PDF
+                </button>
+                <button
+                  class="btn-sign"
+                  [disabled]="!hasAgreed"
+                  (click)="continueToDepositPayment()"
+                >
+                  <i class="fas fa-credit-card"></i> Đồng ý & Thanh toán cọc
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </ng-container>
+</div>
