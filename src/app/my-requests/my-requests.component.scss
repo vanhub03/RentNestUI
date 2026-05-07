@@ -1,0 +1,121 @@
+.section-heading {
+  font-size: 1.5rem;
+}
+
+.request-card-wrapper {
+  box-shadow: var(--shadow-sm);
+}
+
+.request-card-wrapper.approved {
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.05);
+}
+
+.request-card-wrapper.pending {
+  opacity: 0.92;
+}
+
+.request-card-wrapper.rejected {
+  border: 1px solid rgba(239, 68, 68, 0.18);
+}
+
+.request-card-wrapper.cancelled {
+  border: 1px solid rgba(107, 114, 128, 0.18);
+  opacity: 0.8;
+}
+
+.request-card {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.request-thumbnail {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.status-pending {
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.status-approved {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.status-rejected {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.status-cancelled {
+  background: rgba(107, 114, 128, 0.1);
+  color: var(--text-muted);
+  border: 1px solid rgba(107, 114, 128, 0.2);
+}
+
+.request-title {
+  font-size: 1.25rem;
+}
+
+.request-address {
+  margin-bottom: 0;
+}
+
+.request-code {
+  font-size: 1.1rem;
+}
+
+.approved-box,
+.rejected-box,
+.cancelled-box {
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: var(--radius-md);
+}
+
+.approved-box {
+  background: rgba(15, 82, 186, 0.05);
+  border: 1px dashed rgba(15, 82, 186, 0.2);
+}
+
+.rejected-box {
+  background: rgba(239, 68, 68, 0.05);
+  border: 1px dashed rgba(239, 68, 68, 0.2);
+}
+
+.cancelled-box {
+  background: rgba(107, 114, 128, 0.05);
+  border: 1px dashed rgba(107, 114, 128, 0.2);
+}
+
+.approved-title {
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .request-card {
+    flex-direction: column;
+  }
+
+  .request-thumbnail {
+    width: 100%;
+    height: 200px;
+  }
+}

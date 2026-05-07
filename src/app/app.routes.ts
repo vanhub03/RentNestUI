@@ -12,6 +12,8 @@ import { RoomDetailComponent } from './room-detail/room-detail.component';
 import { RentalRequests } from './landlord/rental-requests/rental-requests.component';
 import { LandlordRentalRequestDetailComponent } from './landlord/rental-request-detail/rental-request-detail.component';
 import { ContractPreviewComponent } from './contract-preview/contract-preview.component';
+import { TenantLayoutComponent } from './layouts/tenant-layout/tenant-layout.component';
+import { MyRequestsComponent } from './my-requests/my-requests.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -25,6 +27,7 @@ export const routes: Routes = [
       { path: 'add-tenant', component: AddTenantComponent },
       { path: 'rental-requests', component: RentalRequests },
       { path: 'rental-requests/:id', component: LandlordRentalRequestDetailComponent },
+      { path: 'contract-preview/:requestId', component: ContractPreviewComponent },
       { path: '', redirectTo: 'rooms', pathMatch: 'full' },
     ],
   },
@@ -35,8 +38,15 @@ export const routes: Routes = [
       { path: 'home', component: HomeComponent },
       { path: 'rooms', component: PublicRoomsComponent },
       { path: 'rooms/:id', component: RoomDetailComponent },
-      { path: 'contract-preview/:requestId', component: ContractPreviewComponent },
       { path: '', redirectTo: 'home', pathMatch: 'full' },
+      {
+        path: '',
+        component: TenantLayoutComponent,
+        children: [
+          { path: 'my-requests', component: MyRequestsComponent },
+          { path: 'contract-preview/:requestId', component: ContractPreviewComponent },
+        ],
+      },
     ],
   },
   { path: '**', redirectTo: 'login' },

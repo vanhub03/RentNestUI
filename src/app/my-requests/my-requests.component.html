@@ -1,0 +1,138 @@
+<div class="d-flex flex-column gap-4">
+  <div
+    class="d-flex justify-content-between align-items-center border-bottom border-color pb-3 flex-wrap gap-2"
+  >
+    <h2 class="font-bold m-0 section-heading">Yêu Cầu & Đặt Cọc</h2>
+    <span class="text-muted text-sm">{{ totalElements }} yêu cầu</span>
+  </div>
+
+  <div *ngIf="isLoading" class="card p-4 text-center">Đang tải yêu cầu của bạn...</div>
+
+  <div *ngIf="!isLoading && requests.length === 0" class="card p-4 text-center">
+    Bạn chưa có yêu cầu thuê nào.
+  </div>
+
+  @for (request of requests; track request.id) {
+    <div class="card p-4" [ngClass]="getCardClass(request.status)">
+      <div class="request-card">
+        <img
+          [src]="
+            request.roomThumbnail ||
+            'https://images.unsplash.com/photo-1522771732448-6dabd57cacc2?w=600&auto=format&fit=crop'
+          "
+          class="request-thumbnail"
+          alt="Room"
+        />
+        <div class="flex-1">
+          <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
+            <div>
+              <div class="status-badge mb-2" [ngClass]="getStatusClass(request.status)">
+                <i [class]="getStatusIcon(request.status)"></i>
+                {{ getStatusLabel(request.status) }}
+              </div>
+              <h3 class="font-bold mb-1 request-title">{{ request.roomName }}</h3>
+              <p class="text-muted text-sm request-address">
+                <i class="fas fa-map-marker-alt"></i> {{ request.hostelName }},
+                {{ request.hostelAddress }}
+              </p>
+            </div>
+            <div class="text-right">
+              <div class="text-muted text-sm mb-1">Mã YC</div>
+              <div class="font-bold request-code">#YC-{{ request.id | number: '3.0' }}</div>
+            </div>
+          </div>
+
+          <hr class="my-3 border-color" />
+
+          <div class="d-flex gap-4 mb-3 flex-wrap request-meta">
+            <div>
+              <span class="text-muted text-sm">Chủ nhà:</span>
+              <strong class="text-main"> {{ request.landlordName || 'Đang cập nhật' }}</strong>
+            </div>
+            <div>
+              <span class="text-muted text-sm">Ngày muốn ở:</span>
+              <strong [class.text-primary]="request.status === 'APPROVED'">
+                {{ request.expectedMoveInDate | date: 'dd/MM/yyyy' }}
+              </strong>
+            </div>
+            <div>
+              <span class="text-muted text-sm">Tiền cọc yêu cầu:</span>
+              <strong class="text-success"> {{ request.depositAmount | number: '1.0-0' }}đ </strong>
+            </div>
+          </div>
+
+          <div *ngIf="request.status === 'APPROVED'" class="approved-box">
+            <h4 class="font-semibold text-primary mb-1 approved-title">
+              <i class="fas fa-file-contract"></i> Yêu cầu của bạn đã được duyệt
+            </h4>
+            <p class="text-sm text-muted m-0">
+              Chủ nhà đã duyệt yêu cầu thuê. Bạn có thể liên hệ trực tiếp để chốt bước tiếp theo
+              hoặc xem lại chi tiết phòng.
+            </p>
+          </div>
+
+          <div *ngIf="request.status === 'REJECTED'" class="rejected-box">
+            <h4 class="font-semibold text-danger mb-1 approved-title">
+              <i class="fas fa-circle-exclamation"></i> Yêu cầu bị từ chối
+            </h4>
+            <p class="text-sm text-muted m-0">
+              {{ request.rejectReason || 'Chủ nhà đã từ chối yêu cầu này.' }}
+            </p>
+          </div>
+
+          <div *ngIf="request.status === 'CANCELLED'" class="cancelled-box">
+            <p class="text-sm text-muted m-0">
+              Bạn đã hủy yêu cầu này. Nếu vẫn quan tâm, bạn có thể gửi lại yêu cầu từ trang chi tiết
+              phòng.
+            </p>
+          </div>
+
+          <div class="d-flex gap-2 justify-content-end mt-4 flex-wrap">
+            <!-- <a
+              *ngIf="request.landlordPhone"
+              class="btn btn-outline"
+              [href]="'tel:' + request.landlordPhone"
+            >
+              <i class="fas fa-phone"></i> Liên hệ chủ nhà
+            </a> -->
+            <a [routerLink]="['/rooms', request.roomId]" class="btn btn-primary px-4">
+              <i class="fas fa-eye"></i> Xem chi tiết phòng
+            </a>
+            <a
+              *ngIf="request.status === 'APPROVED'"
+              [routerLink]="['/contract-preview', request.id]"
+              class="btn btn-primary px-4"
+            >
+              <i class="fas fa-file-contract"></i> Xem hợp đồng nháp
+            </a>
+            <button
+              *ngIf="request.status === 'PENDING'"
+              class="btn btn-outline text-danger border-color"
+              (click)="cancelRequest(request.id)"
+            >
+              <i class="fas fa-times"></i> Hủy yêu cầu
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <div class="d-flex justify-content-end" *ngIf="totalPages > 1">
+    <ul class="pagination m-0">
+      <li class="page-item" [class.disabled]="page === 0">
+        <a class="page-link cursor-pointer" (click)="changePage(page - 1)">
+          <i class="fas fa-chevron-left"></i>
+        </a>
+      </li>
+      <li class="page-item active">
+        <a class="page-link">{{ page + 1 }}</a>
+      </li>
+      <li class="page-item" [class.disabled]="page >= totalPages - 1">
+        <a class="page-link cursor-pointer" (click)="changePage(page + 1)">
+          <i class="fas fa-chevron-right"></i>
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>

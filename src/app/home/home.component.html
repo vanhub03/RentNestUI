@@ -122,7 +122,9 @@
 
       <div class="d-grid grid-cols-4 gap-4">
         @for (roomItem of latestRooms; track roomItem.id) {
-          <app-room-card class="reveal" style="display: block" [room]="roomItem"></app-room-card>
+          <a [routerLink]="['/rooms', roomItem.id]" style="color: inherit; text-decoration: none">
+            <app-room-card class="reveal" style="display: block" [room]="roomItem"></app-room-card>
+          </a>
         } @empty {
           <div class="col-span-4 text-center py-5 text-muted reveal">
             Chưa có phòng trọ nào được đăng.

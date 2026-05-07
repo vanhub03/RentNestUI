@@ -28,4 +28,11 @@ export class RentalRequestService {
       rejectReason,
     });
   }
+  getMyRequests(page = 0, size = 10): Observable<any> {
+    const params = new HttpParams().set('page', page).set('size', size);
+    return this.http.get(enviroment.apiUrl + '/tenant/rental-requests', { params });
+  }
+  cancelRequest(id: number): Observable<any> {
+    return this.http.post(`${enviroment.apiUrl}/tenant/rental-requests/${id}/cancel`, {});
+  }
 }
