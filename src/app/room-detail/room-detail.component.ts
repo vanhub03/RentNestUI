@@ -92,7 +92,10 @@ export class RoomDetailComponent implements OnInit {
     this.isLoading = true;
     this.roomService.getRoomDetail(this.roomId).subscribe({
       next: (res) => {
-        this.room = res;
+        this.room = {
+          ...res,
+          description: res?.description ?? '',
+        };
         this.isLoading = false;
         this.cdr.detectChanges();
       },
