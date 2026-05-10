@@ -62,6 +62,14 @@ export class ContractPreviewComponent implements OnInit {
   printContract() {
     window.print();
   }
-  remindTenant() {}
-  continueToDepositPayment() {}
+  continueToDepositPayment() {
+    if (!this.hasAgreed || !this.canPayDeposit) {
+      this.toastr.warning('Bạn cần đồng ý với các điều khoản trước khi tiếp tục');
+      return;
+    }
+    this.router.navigate(['/payment-deposit', this.contract.rentalRequestId]);
+  }
+  get canPayDeposit(): boolean {
+    return this.contract?.status === 'WAITING_FOR_SIGNATURE' && !this.isLandlord;
+  }
 }

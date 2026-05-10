@@ -14,6 +14,7 @@ import { LandlordRentalRequestDetailComponent } from './landlord/rental-request-
 import { ContractPreviewComponent } from './contract-preview/contract-preview.component';
 import { TenantLayoutComponent } from './layouts/tenant-layout/tenant-layout.component';
 import { MyRequestsComponent } from './my-requests/my-requests.component';
+import { PaymentDepositComponent } from './payment-deposit/payment-deposit.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -45,6 +46,8 @@ export const routes: Routes = [
         children: [
           { path: 'my-requests', component: MyRequestsComponent },
           { path: 'contract-preview/:requestId', component: ContractPreviewComponent },
+          { path: 'payment-deposit/:requestId', component: PaymentDepositComponent },
+          { path: 'payment-deposit/return', component: PaymentDepositComponent },
         ],
       },
     ],

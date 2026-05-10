@@ -200,7 +200,7 @@
                 </div>
               </div>
 
-              <div class="signature-area" *ngIf="!isLandlord">
+              <div class="signature-area" *ngIf="!isLandlord && canPayDeposit">
                 <label class="checkbox-custom">
                   <input type="checkbox" [(ngModel)]="hasAgreed" />
                   <div>
@@ -225,9 +225,6 @@
                   <i class="fas fa-print"></i> In PDF
                 </button>
               </div>
-              <button class="btn btn-primary" (click)="remindTenant()">
-                <i class="fas fa-paper-plane"></i> Nhắc khách thanh toán cọc
-              </button>
             </div>
 
             <div class="contract-footer-actions" *ngIf="!isLandlord">
@@ -244,6 +241,7 @@
                 <button
                   class="btn-sign"
                   [disabled]="!hasAgreed"
+                  *ngIf="canPayDeposit"
                   (click)="continueToDepositPayment()"
                 >
                   <i class="fas fa-credit-card"></i> Đồng ý & Thanh toán cọc

@@ -1,0 +1,82 @@
+<main class="py-5 payment-page">
+  <div class="container">
+    <div class="payment-panel" *ngIf="isLoading">
+      <div class="payment-icon">
+        <i class="fas fa-spinner fa-spin"></i>
+      </div>
+      <h2 class="font-bold m-0">
+        {{ isReturnPage ? 'Đang xác nhận thanh toán' : 'Đang tải thông tin cọc' }}
+      </h2>
+      <p class="text-muted m-0">Vui lòng chờ trong giây lát.</p>
+    </div>
+
+    <div class="payment-panel" *ngIf="!isLoading && !isReturnPage && contract">
+      <div class="payment-icon">
+        <i class="fas fa-qrcode"></i>
+      </div>
+      <h2 class="font-bold m-0">Thanh toán tiền cọc</h2>
+      <p class="text-muted m-0">
+        Bạn đã đồng ý nội dung hợp đồng nháp cho yêu cầu #YC-{{ requestId | number: '3.0' }}. Bấm
+        thanh toán để mở trang MoMo và quét mã QR hoặc đăng nhập ứng dụng MoMo.
+      </p>
+      <div class="payment-summary">
+        <div>
+          <span>Phòng</span>
+          <strong>{{ contract.roomName }}</strong>
+        </div>
+        <div>
+          <span>Cơ sở</span>
+          <strong>{{ contract.hostelName }}</strong>
+        </div>
+        <div>
+          <span>Số tiền cọc</span>
+          <strong class="amount">{{ contract.depositAmount | number: '1.0-0' }}đ</strong>
+        </div>
+      </div>
+      <div class="d-flex gap-2 justify-content-center flex-wrap">
+        <a class="btn btn-outline" [routerLink]="['/contract-preview', requestId]">
+          <i class="fas fa-arrow-left"></i> Xem lại hợp đồng
+        </a>
+        <button
+          class="btn btn-primary"
+          [disabled]="isCreatingPayment"
+          (click)="createMomoPayment()"
+        >
+          <i
+            class="fas"
+            [class.fa-spinner]="isCreatingPayment"
+            [class.fa-spin]="isCreatingPayment"
+            [class.fa-qrcode]="!isCreatingPayment"
+          ></i>
+          {{ isCreatingPayment ? 'Đang tạo thanh toán...' : 'Thanh toán bằng MoMo' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="payment-panel" *ngIf="!isLoading && isReturnPage">
+      <div class="payment-icon" [class.payment-icon-error]="!paymentResult?.success">
+        <i
+          class="fas"
+          [class.fa-check-circle]="paymentResult?.success"
+          [class.fa-times-circle]="!paymentResult?.success"
+        ></i>
+      </div>
+      <h2 class="font-bold m-0">
+        {{ paymentResult?.success ? 'Thanh toán thành công' : 'Thanh toán chưa thành công' }}
+      </h2>
+      <p class="text-muted m-0">{{ paymentResult?.message }}</p>
+      <div class="d-flex gap-2 justify-content-center flex-wrap">
+        <a class="btn btn-outline" [routerLink]="['/my-requests']">
+          <i class="fas fa-list"></i> Yêu cầu của tôi
+        </a>
+        <a
+          class="btn btn-primary"
+          *ngIf="requestId"
+          [routerLink]="['/contract-preview', requestId]"
+        >
+          <i class="fas fa-file-contract"></i> Xem hợp đồng
+        </a>
+      </div>
+    </div>
+  </div>
+</main>
