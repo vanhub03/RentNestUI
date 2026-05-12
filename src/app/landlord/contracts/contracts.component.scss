@@ -1,0 +1,25 @@
+.page-title {
+  font-size: 1.5rem;
+}
+
+.action-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.badge-info {
+  background: rgba(59, 130, 246, 0.12);
+  color: var(--info);
+}
+
+.badge-secondary {
+  background: rgba(100, 116, 139, 0.12);
+  color: var(--text-muted);
+}
+
+@media (max-width: 768px) {
+  .card-header .form-control {
+    width: 100% !important;
+  }
+}

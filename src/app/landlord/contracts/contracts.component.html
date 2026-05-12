@@ -1,0 +1,148 @@
+<div class="admin-content">
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <h2 class="m-0 font-semibold page-title">Quản lý Hợp Đồng</h2>
+    <span class="text-sm text-muted">Tổng: {{ totalElements }} hợp đồng</span>
+  </div>
+
+  <div class="card p-0 mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+      <div class="d-flex gap-3">
+        <select
+          class="form-control form-control-sm"
+          style="width: 190px"
+          [(ngModel)]="filter.status"
+          (change)="onFilterChange()"
+        >
+          <option value="">Tất cả trạng thái</option>
+          <option value="ACTIVE">Còn hiệu lực</option>
+          <option value="EXPIRING">Sắp hết hạn</option>
+          <option value="WAITING_FOR_SIGNATURE">Chờ ký & đặt cọc</option>
+          <option value="EXPIRED">Đã hết hạn</option>
+          <option value="TERMINATED">Đã thanh lý</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Mã HĐ</th>
+            <th>Khách Thuê</th>
+            <th>Phòng</th>
+            <th>Thời Hạn</th>
+            <th>Tiền Cọc</th>
+            <th>Tình trạng</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="isLoading">
+            <td colspan="7" class="text-center py-4 text-muted">
+              <i class="fas fa-spinner fa-spin me-2"></i> Đang tải dữ liệu...
+            </td>
+          </tr>
+
+          <tr *ngIf="!isLoading && contracts.length === 0">
+            <td colspan="7" class="text-center py-4 text-muted">Chưa có hợp đồng nào.</td>
+          </tr>
+
+          @for (contract of contracts; track contract.id) {
+            <tr>
+              <td class="font-medium text-primary">#{{ contract.contractCode }}</td>
+              <td>
+                <div class="font-medium">{{ contract.tenantName || 'Chưa cập nhật' }}</div>
+                <div class="text-muted text-xs">{{ contract.tenantPhone || 'Chưa có SĐT' }}</div>
+              </td>
+              <td>
+                <div class="font-medium">{{ contract.roomName }}</div>
+                <div class="text-muted text-xs">{{ contract.hostelName }}</div>
+              </td>
+              <td>
+                <div>{{ contract.startDate | date: 'dd/MM/yyyy' }}</div>
+                <div
+                  class="text-xs"
+                  [class.text-danger]="contract.expiringSoon || contract.status === 'EXPIRED'"
+                  [class.font-bold]="contract.expiringSoon || contract.status === 'EXPIRED'"
+                  [class.text-muted]="!contract.expiringSoon && contract.status !== 'EXPIRED'"
+                >
+                  Đến: {{ contract.endDate | date: 'dd/MM/yyyy' }}
+                </div>
+              </td>
+              <td class="text-success font-medium">
+                {{ contract.depositAmount | number: '1.0-0' }}đ
+              </td>
+              <td>
+                <span class="badge" [ngClass]="getStatusClass(contract)">
+                  {{ getStatusLabel(contract) }}
+                </span>
+              </td>
+              <td class="text-right">
+                <div class="action-group justify-content-end">
+                  <a
+                    *ngIf="contract.rentalRequestId"
+                    class="btn btn-sm btn-outline"
+                    [routerLink]="['/landlord/contract-preview', contract.rentalRequestId]"
+                    title="Xem hợp đồng"
+                  >
+                    <i class="fas fa-eye"></i>
+                  </a>
+                  <a
+                    *ngIf="!contract.rentalRequestId && contract.contractFileUrl"
+                    class="btn btn-sm btn-outline"
+                    [href]="contract.contractFileUrl"
+                    target="_blank"
+                    rel="noopener"
+                    title="Xem file hợp đồng"
+                  >
+                    <i class="fas fa-eye"></i>
+                  </a>
+                  <a
+                    *ngIf="contract.contractFileUrl"
+                    class="btn btn-sm btn-outline"
+                    [href]="contract.contractFileUrl"
+                    target="_blank"
+                    rel="noopener"
+                    download
+                    title="Mở file hợp đồng"
+                  >
+                    <i class="fas fa-file-pdf text-danger"></i>
+                  </a>
+                  <button
+                    *ngIf="contract.expiringSoon || contract.status === 'EXPIRED'"
+                    class="btn btn-sm btn-outline"
+                    title="Gia hạn hợp đồng"
+                    (click)="renewContract(contract)"
+                  >
+                    <i class="fas fa-sync text-primary"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card-footer d-flex justify-content-between align-items-center bg-transparent">
+      <span class="text-sm text-muted">
+        Hiển thị trang {{ filter.page + 1 }} / {{ totalPages || 1 }}
+      </span>
+      <ul class="pagination m-0">
+        <li class="page-item" [class.disabled]="filter.page === 0">
+          <a class="page-link cursor-pointer" (click)="changePage(filter.page - 1)">
+            <i class="fas fa-chevron-left"></i>
+          </a>
+        </li>
+        <li class="page-item active">
+          <a class="page-link">{{ filter.page + 1 }}</a>
+        </li>
+        <li class="page-item" [class.disabled]="filter.page >= totalPages - 1 || totalPages === 0">
+          <a class="page-link cursor-pointer" (click)="changePage(filter.page + 1)">
+            <i class="fas fa-chevron-right"></i>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
