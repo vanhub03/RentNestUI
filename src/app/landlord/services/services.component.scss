@@ -1,0 +1,37 @@
+.page-title {
+  font-size: 1.5rem;
+}
+
+.action-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.service-modal {
+  max-width: 600px;
+}
+
+.meter-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.meter-option:hover {
+  background: var(--bg-light);
+}
+
+@media (max-width: 768px) {
+  .card-header .form-control {
+    width: 100% !important;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}

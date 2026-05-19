@@ -1,0 +1,182 @@
+<div class="admin-content">
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <h2 class="m-0 font-semibold page-title">Quản lý Phí Dịch Vụ</h2>
+    <span class="text-sm text-muted">Tổng: {{ totalElements }} dịch vụ</span>
+  </div>
+
+  <div class="card p-0 mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+      <div class="d-flex gap-3">
+        <select
+          class="form-control form-control-sm"
+          style="width: 220px"
+          [(ngModel)]="filter.hostelId"
+          (change)="onFilterChange()"
+        >
+          <option value="">Tất cả tòa nhà</option>
+          @for (hostel of hostels; track hostel.id) {
+            <option [value]="hostel.id">{{ hostel.name }}</option>
+          }
+        </select>
+      </div>
+      <button class="btn btn-primary" (click)="openCreateModal()">
+        <i class="fas fa-plus"></i> Thêm Dịch Vụ Mới
+      </button>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Tòa Nhà / Cơ Sở</th>
+            <th>Tên Dịch Vụ</th>
+            <th>Đơn Giá</th>
+            <th>Đơn Vị Tính</th>
+            <th>Loại Hình</th>
+            <th class="text-right">Hành động</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="isLoading">
+            <td colspan="6" class="text-center py-4 text-muted">
+              <i class="fas fa-spinner fa-spin me-2"></i> Đang tải dữ liệu...
+            </td>
+          </tr>
+
+          <tr *ngIf="!isLoading && services.length === 0">
+            <td colspan="6" class="text-center py-4 text-muted">Chưa có dịch vụ nào.</td>
+          </tr>
+
+          @for (service of services; track service.id) {
+            <tr>
+              <td>Riêng: {{ service.hostelName }}</td>
+              <td class="font-medium text-main">
+                <i [class]="getServiceIcon(service.serviceName)"></i> {{ service.serviceName }}
+              </td>
+              <td class="font-bold text-primary">{{ service.unitPrice | number: '1.0-0' }}đ</td>
+              <td>{{ service.unitName }}</td>
+              <td>
+                <span class="badge" [ngClass]="service.metered ? 'badge-warning text-dark' : 'badge-success'">
+                  <i [class]="service.metered ? 'fas fa-tachometer-alt' : 'fas fa-cubes'"></i>
+                  {{ service.metered ? 'Chốt số hàng tháng' : 'Đóng trọn gói' }}
+                </span>
+              </td>
+              <td class="text-right">
+                <div class="action-group justify-content-end">
+                  <button class="btn btn-sm btn-outline" (click)="openEditModal(service)">
+                    <i class="fas fa-edit"></i> Sửa
+                  </button>
+                  <button class="btn btn-sm btn-outline text-danger" (click)="deleteService(service)">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card-footer d-flex justify-content-between align-items-center bg-transparent">
+      <span class="text-sm text-muted">
+        Hiển thị trang {{ filter.page + 1 }} / {{ totalPages || 1 }}
+      </span>
+      <ul class="pagination m-0">
+        <li class="page-item" [class.disabled]="filter.page === 0">
+          <a class="page-link cursor-pointer" (click)="changePage(filter.page - 1)">
+            <i class="fas fa-chevron-left"></i>
+          </a>
+        </li>
+        <li class="page-item active">
+          <a class="page-link">{{ filter.page + 1 }}</a>
+        </li>
+        <li class="page-item" [class.disabled]="filter.page >= totalPages - 1 || totalPages === 0">
+          <a class="page-link cursor-pointer" (click)="changePage(filter.page + 1)">
+            <i class="fas fa-chevron-right"></i>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" [class.active]="isModalOpen">
+  <div class="modal service-modal">
+    <div class="modal-header">
+      <h3 class="modal-title">{{ editingService ? 'Cập Nhật Dịch Vụ' : 'Khởi Tạo Dịch Vụ Mới' }}</h3>
+      <button class="modal-close" [disabled]="isSubmitting" (click)="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form (ngSubmit)="submitService()">
+        <div class="form-group mb-3">
+          <label class="form-label">Tòa Nhà Áp Dụng</label>
+          <select class="form-control" [(ngModel)]="form.hostelId" name="hostelId" [disabled]="form.applyAllHostels || !!editingService">
+            <option value="">-- Chọn tòa nhà --</option>
+            @for (hostel of hostels; track hostel.id) {
+              <option [value]="hostel.id">{{ hostel.name }}</option>
+            }
+          </select>
+          <label class="d-flex align-items-center gap-2 mt-2 text-sm" *ngIf="!editingService">
+            <input type="checkbox" [(ngModel)]="form.applyAllHostels" name="applyAllHostels" />
+            Áp dụng cho tất cả tòa nhà
+          </label>
+        </div>
+
+        <div class="form-group mb-3">
+          <label class="form-label">Tên Dịch Vụ</label>
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="form.serviceName"
+            name="serviceName"
+            placeholder="VD: Tiền Điện, Tiền Nước, Internet..."
+          />
+        </div>
+
+        <div class="d-grid grid-cols-2 gap-3 mb-3 form-grid">
+          <div class="form-group">
+            <label class="form-label">Đơn Giá VNĐ</label>
+            <input type="number" class="form-control" [(ngModel)]="form.unitPrice" name="unitPrice" min="0" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Đơn Vị Tính</label>
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="form.unitName"
+              name="unitName"
+              placeholder="VD: kWh, Khối, Người, Phòng"
+            />
+          </div>
+        </div>
+
+        <div class="form-group mb-4">
+          <label class="form-label">Hành vi tính phí</label>
+          <div class="d-flex flex-column gap-2 mt-2">
+            <label class="meter-option">
+              <input type="radio" [(ngModel)]="form.metered" name="metered" [value]="true" />
+              <div>
+                <div class="font-medium">Chốt số đồng hồ định kỳ</div>
+                <div class="text-xs text-muted">Dùng cho điện, nước công tơ cần nhập chỉ số cũ/mới hàng tháng.</div>
+              </div>
+            </label>
+            <label class="meter-option">
+              <input type="radio" [(ngModel)]="form.metered" name="metered" [value]="false" />
+              <div>
+                <div class="font-medium">Thu phí trọn gói</div>
+                <div class="text-xs text-muted">Tính giá cố định theo đơn vị như người/tháng hoặc phòng/tháng.</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-footer p-0 border-0 mt-4 d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-outline" [disabled]="isSubmitting" (click)="closeModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary" [disabled]="isSubmitting">
+            <i class="fas fa-save"></i> {{ isSubmitting ? 'Đang lưu...' : 'Lưu Dịch Vụ' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
