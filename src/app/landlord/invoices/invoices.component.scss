@@ -1,0 +1,46 @@
+.invoice-stats {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.border-left.info {
+  border-left: 4px solid var(--info);
+}
+
+.border-left.success {
+  border-left: 4px solid var(--success);
+}
+
+.border-left.danger {
+  border-left: 4px solid var(--danger);
+}
+
+.action-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.invoice-modal {
+  max-width: 780px;
+}
+
+.metered-panel {
+  border-top: 1px solid var(--border-color);
+  margin-top: 1rem;
+  padding-top: 1rem;
+}
+
+.reading-row {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr 0.8fr 0.8fr auto;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .invoice-stats,
+  .reading-row {
+    grid-template-columns: 1fr;
+  }
+}
