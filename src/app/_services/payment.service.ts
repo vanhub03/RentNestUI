@@ -17,4 +17,11 @@ export class PaymentService {
   confirmDepositMomoReturn(momoParams: Record<string, string>): Observable<any> {
     return this.http.post(`${enviroment.apiUrl}/tenant/payments/deposit/momo-return`, momoParams);
   }
+
+  createInvoiceMomoUrl(invoiceId: number): Observable<any> {
+    return this.http.post(`${enviroment.apiUrl}/tenant/payments/invoice/${invoiceId}/momo`, {});
+  }
+  confirmInvoiceMomoReturn(momoParams: Record<string, string>): Observable<any> {
+    return this.http.post(`${enviroment.apiUrl}/tenant/payments/invoice/momo-return`, momoParams);
+  }
 }

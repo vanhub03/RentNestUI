@@ -18,6 +18,7 @@ import { PaymentDepositComponent } from './payment-deposit/payment-deposit.compo
 import { LandlordContractsComponent } from './landlord/contracts/contracts.component';
 import { LandlordServicesComponent } from './landlord/services/services.component';
 import { LandlordInvoicesComponent } from './landlord/invoices/invoices.component';
+import { TenantInvoicesComponent } from './tenant-invoices/tenant-invoices.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -54,6 +55,7 @@ export const routes: Routes = [
           { path: 'contract-preview/:requestId', component: ContractPreviewComponent },
           { path: 'payment-deposit/:requestId', component: PaymentDepositComponent },
           { path: 'payment-deposit/return', component: PaymentDepositComponent },
+          { path: 'my-invoices', component: TenantInvoicesComponent },
         ],
       },
     ],

@@ -1,0 +1,223 @@
+<!-- Container chính của màn hóa đơn tenant, nằm trong tenant-layout nên không tạo lại sidebar/header. -->
+<div class="d-flex flex-column gap-4">
+  <!-- Header trang: tiêu đề, mô tả ngắn và bộ lọc năm. -->
+  <div
+    class="d-flex justify-content-between align-items-center border-bottom border-color pb-3 flex-wrap gap-2"
+  >
+    <div>
+      <h2 class="font-bold m-0 section-heading">Lịch Sử Hóa Đơn</h2>
+      <p class="text-muted text-sm m-0">
+        Theo dõi tiền phòng, dịch vụ và trạng thái thanh toán hằng tháng.
+      </p>
+    </div>
+    <select class="form-control year-select" [(ngModel)]="filter.year" (change)="onYearChange()">
+      @for (year of yearOptions; track year) {
+        <option [value]="year">Năm {{ year }}</option>
+      }
+    </select>
+  </div>
+
+  <!-- Loading riêng cho request lấy hóa đơn chưa thanh toán. -->
+  <div *ngIf="isLoadingCurrent" class="card p-4 text-center text-muted">
+    Đang kiểm tra hóa đơn chờ thanh toán...
+  </div>
+
+  <!-- Card đỏ hiển thị hóa đơn chưa thanh toán gần nhất, tương ứng phần Current Unpaid Invoice trong HTML mẫu. -->
+  <div *ngIf="!isLoadingCurrent && currentUnpaidInvoice" class="card p-0 unpaid-card">
+    <div
+      class="card-header unpaid-header d-flex justify-content-between align-items-center flex-wrap gap-2"
+    >
+      <span class="font-bold">
+        <i class="fas fa-exclamation-circle"></i>
+        HÓA ĐƠN ĐANG CHỜ THANH TOÁN (Kỳ {{ currentUnpaidInvoice.invoiceMonth }})
+      </span>
+      <span class="badge bg-white text-danger">{{
+        getStatusLabel(currentUnpaidInvoice.status)
+      }}</span>
+    </div>
+
+    <div class="card-body p-4">
+      <div
+        class="d-flex justify-content-between align-items-center mb-4 pb-4 border-bottom border-color flex-wrap gap-3"
+      >
+        <div>
+          <h3 class="font-bold mb-1 invoice-title">
+            {{ formatMonth(currentUnpaidInvoice.invoiceMonth) }}
+          </h3>
+          <p class="text-muted m-0 text-sm">
+            {{ currentUnpaidInvoice.roomName }} - {{ currentUnpaidInvoice.hostelName }}
+          </p>
+        </div>
+        <div class="text-right">
+          <div class="text-muted text-sm mb-1">
+            Hạn thanh toán: {{ currentUnpaidInvoice.dueDate | date: 'dd/MM/yyyy' }}
+          </div>
+          <div class="text-danger font-bold total-due">
+            {{ currentUnpaidInvoice.totalAmount | number: '1.0-0' }}đ
+          </div>
+        </div>
+      </div>
+
+      <!-- Danh sách từng dòng tiền: tiền phòng, điện, nước, dịch vụ... lấy từ invoice.items backend trả về. -->
+      <div class="invoice-items mb-4 text-sm">
+        @for (item of currentUnpaidInvoice.items; track item.id) {
+          <div class="d-flex justify-content-between item-row">
+            <span class="text-muted">{{ item.description }}:</span>
+            <span class="font-medium">{{ item.amount | number: '1.0-0' }}đ</span>
+          </div>
+        }
+      </div>
+
+      <!-- Nhóm action của hóa đơn chưa thanh toán: in PDF và placeholder thanh toán. -->
+      <div class="d-flex justify-content-end gap-2 flex-wrap">
+        <button class="btn btn-outline" (click)="printInvoice(currentUnpaidInvoice)">
+          <i class="fas fa-download"></i> PDF
+        </button>
+        <button
+          class="btn btn-danger"
+          [disabled]="isCreatingInvoicePaymentId === currentUnpaidInvoice.id"
+          (click)="payInvoice(currentUnpaidInvoice)"
+        >
+          <i
+            class="fas"
+            [class.fa-spinner]="isCreatingInvoicePaymentId === currentUnpaidInvoice.id"
+            [class.fa-spin]="isCreatingInvoicePaymentId === currentUnpaidInvoice.id"
+            [class.fa-credit-card]="isCreatingInvoicePaymentId !== currentUnpaidInvoice.id"
+          ></i>
+          {{
+            isCreatingInvoicePaymentId === currentUnpaidInvoice.id
+              ? 'Đang tạo thanh toán...'
+              : 'Thanh Toán Ngay'
+          }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trạng thái rỗng khi tenant không còn hóa đơn nào chờ thanh toán. -->
+  <div *ngIf="!isLoadingCurrent && !currentUnpaidInvoice" class="card p-4 paid-empty">
+    <div class="d-flex align-items-center gap-3">
+      <i class="fas fa-circle-check text-success paid-icon"></i>
+      <div>
+        <h3 class="font-bold m-0 paid-title">Không có hóa đơn đang chờ thanh toán</h3>
+        <p class="text-muted text-sm m-0">
+          Các hóa đơn đã phát sinh sẽ nằm trong bảng lịch sử bên dưới.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bảng lịch sử hóa đơn theo năm đang chọn. -->
+  <div class="card p-0 overflow-hidden">
+    <div class="table-responsive">
+      <table class="table m-0">
+        <thead>
+          <tr>
+            <th>Kỳ hóa đơn</th>
+            <th>Tổng tiền</th>
+            <th>Hạn thanh toán</th>
+            <th>Trạng thái</th>
+            <th class="text-right">Hành động</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="isLoading">
+            <td colspan="5" class="text-center py-4 text-muted">
+              <i class="fas fa-spinner fa-spin"></i> Đang tải hóa đơn...
+            </td>
+          </tr>
+          <tr *ngIf="!isLoading && getHistoryInvoices().length === 0">
+            <td colspan="5" class="text-center py-4 text-muted">Chưa có hóa đơn trong năm này.</td>
+          </tr>
+          @for (invoice of getHistoryInvoices(); track invoice.id) {
+            <tr>
+              <td>
+                <strong>{{ formatMonth(invoice.invoiceMonth) }}</strong>
+                <br />
+                <span class="text-muted text-sm"
+                  >{{ invoice.roomName }} - {{ invoice.hostelName }}</span
+                >
+              </td>
+              <td class="font-medium">{{ invoice.totalAmount | number: '1.0-0' }}đ</td>
+              <td>{{ invoice.dueDate | date: 'dd/MM/yyyy' }}</td>
+              <td>
+                <span class="badge" [ngClass]="getStatusClass(invoice.status)">
+                  {{ getStatusLabel(invoice.status) }}
+                </span>
+              </td>
+              <td class="text-right">
+                <button class="btn btn-sm btn-outline" (click)="viewInvoice(invoice)">
+                  <i class="fas fa-eye"></i> Xem
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Phân trang cho bảng lịch sử hóa đơn. -->
+  <div class="d-flex justify-content-end" *ngIf="totalPages > 1">
+    <ul class="pagination m-0">
+      <li class="page-item" [class.disabled]="page === 0">
+        <a class="page-link cursor-pointer" (click)="changePage(page - 1)">
+          <i class="fas fa-chevron-left"></i>
+        </a>
+      </li>
+      <li class="page-item active">
+        <a class="page-link">{{ page + 1 }}</a>
+      </li>
+      <li class="page-item" [class.disabled]="page >= totalPages - 1">
+        <a class="page-link cursor-pointer" (click)="changePage(page + 1)">
+          <i class="fas fa-chevron-right"></i>
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- Modal xem chi tiết hóa đơn khi tenant bấm nút Xem. -->
+<div class="modal-overlay" [class.active]="selectedInvoice">
+  <div class="modal invoice-detail-modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Chi tiết hóa đơn {{ selectedInvoice?.invoiceMonth }}</h3>
+      <button class="modal-close" (click)="closeDetail()">&times;</button>
+    </div>
+    <div class="modal-body" *ngIf="selectedInvoice">
+      <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+        <div>
+          <div class="font-bold">{{ selectedInvoice.roomName }}</div>
+          <div class="text-muted text-sm">{{ selectedInvoice.hostelName }}</div>
+        </div>
+        <span class="badge" [ngClass]="getStatusClass(selectedInvoice.status)">
+          {{ getStatusLabel(selectedInvoice.status) }}
+        </span>
+      </div>
+
+      <!-- Danh sách item chi tiết của hóa đơn trong modal. -->
+      <div class="detail-list">
+        @for (item of selectedInvoice.items; track item.id) {
+          <div class="detail-row">
+            <span>{{ item.description }}</span>
+            <strong>{{ item.amount | number: '1.0-0' }}đ</strong>
+          </div>
+        }
+      </div>
+
+      <!-- Tổng cộng cuối modal để tenant đối chiếu nhanh. -->
+      <div class="detail-total">
+        <span>Tổng phải thu</span>
+        <strong>{{ selectedInvoice.totalAmount | number: '1.0-0' }}đ</strong>
+      </div>
+
+      <!-- Footer modal: in PDF hoặc đóng modal. -->
+      <div class="modal-footer p-0 border-0 mt-4 d-flex justify-content-end gap-2">
+        <button class="btn btn-outline" (click)="printInvoice(selectedInvoice)">
+          <i class="fas fa-download"></i> PDF
+        </button>
+        <button class="btn btn-primary" (click)="closeDetail()">Đóng</button>
+      </div>
+    </div>
+  </div>
+</div>
