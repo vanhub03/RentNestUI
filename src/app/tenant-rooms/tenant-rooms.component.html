@@ -1,0 +1,185 @@
+<div class="d-flex flex-column gap-4">
+  <!-- Header trang phong dang thue. -->
+  <div
+    class="d-flex justify-content-between align-items-center border-bottom border-color pb-3 flex-wrap gap-2"
+  >
+    <h2 class="font-bold m-0 page-title">Căn Phòng Đang Thuê Của Bạn</h2>
+    <span class="text-muted text-sm">{{ rooms.length }} phòng</span>
+  </div>
+
+  <!-- Loading khi dang goi API. -->
+  <div class="card p-4 text-center text-muted" *ngIf="isLoading">
+    <i class="fas fa-spinner fa-spin"></i> Đang tải phòng đang thuê...
+  </div>
+
+  <!-- Empty state neu tenant chua co hop dong active. -->
+  <div class="card p-4 text-center text-muted" *ngIf="!isLoading && rooms.length === 0">
+    Bạn chưa có phòng đang thuê.
+  </div>
+
+  <!-- Danh sach phong dang thue. -->
+  @for (room of rooms; track room.roomId) {
+    <div class="card p-4">
+      <div class="room-details-card">
+        <!-- Anh dai dien phong. -->
+        <img [src]="getThumbnail(room)" class="room-thumbnail" alt="Room" />
+        <div class="flex-1">
+          <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-3">
+            <div>
+              <div class="badge badge-success mb-2">Đang Thuê</div>
+              <h3 class="font-bold mb-1 room-title">{{ room.roomName }}</h3>
+              <p class="text-muted text-sm m-0">
+                <i class="fas fa-map-marker-alt"></i> {{ room.hostelName }} -
+                {{ room.hostelAddress || 'Chưa cập nhật địa chỉ' }}
+              </p>
+            </div>
+            <div class="text-right">
+              <div class="text-muted text-sm mb-1">Giá Thuê</div>
+              <div class="font-bold text-primary rent-price">
+                {{ room.monthlyRent | number: '1.0-0' }}đ
+              </div>
+            </div>
+          </div>
+
+          <hr class="my-3 border-color" />
+
+          <!-- Thong tin hop dong va chu nha. -->
+          <div class="d-flex gap-4 mb-3 flex-wrap">
+            <div>
+              <span class="text-muted text-sm">Chủ nhà:</span>
+              <strong class="text-main">{{ room.landlordName || 'Chưa cập nhật' }}</strong>
+            </div>
+            <div>
+              <span class="text-muted text-sm">Điện thoại:</span>
+              <strong class="text-main">{{ room.landlordPhone || 'Chưa cập nhật' }}</strong>
+            </div>
+            <div>
+              <span class="text-muted text-sm">Ngày vào ở:</span>
+              <strong class="text-main">{{ room.startDate | date: 'dd/MM/yyyy' }}</strong>
+            </div>
+          </div>
+
+          <!-- Danh sach nguoi dang o trong phong. -->
+          <div class="occupant-panel">
+            <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+              <h4 class="font-semibold m-0 occupant-heading">Người đang ở cùng</h4>
+              <button class="btn btn-sm btn-outline" (click)="openOccupantModal(room)">
+                <i class="fas fa-user-plus"></i> Khai báo thêm người
+              </button>
+            </div>
+            <div class="occupant-list">
+              @for (occupant of room.occupants; track occupant.id) {
+                <div class="occupant-item">
+                  <div>
+                    <strong>{{ occupant.fullName }}</strong>
+                    <span class="badge badge-info ml-2" *ngIf="occupant.representative"
+                      >Đại diện</span
+                    >
+                    <div class="text-muted text-xs">
+                      {{ occupant.phoneNumber || 'Chưa có SĐT' }}
+                      <span *ngIf="occupant.identityCard">- CCCD: {{ occupant.identityCard }}</span>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Action phong. -->
+          <div class="d-flex gap-2 mt-3 flex-wrap">
+            <button class="btn btn-primary btn-sm" disabled>
+              <i class="fas fa-tools"></i> Báo cáo sự cố sửa chữa
+            </button>
+            <button class="btn btn-outline btn-sm" disabled>
+              <i class="fas fa-file-signature"></i> Xem hợp đồng điện tử
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Modal khai bao them nguoi o cung. -->
+<div class="modal-overlay" [class.active]="selectedRoom">
+  <div class="modal co-occupant-modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Khai báo người ở cùng</h3>
+      <button class="modal-close" [disabled]="isSavingOccupant" (click)="closeOccupantModal()">
+        &times;
+      </button>
+    </div>
+    <div class="modal-body" *ngIf="selectedRoom">
+      <p class="text-muted text-sm">
+        Phòng: <strong>{{ selectedRoom.roomName }}</strong> - {{ selectedRoom.hostelName }}
+      </p>
+      <form class="needs-validation" (ngSubmit)="addCoOccupant()">
+        <!-- Ho ten nguoi o cung. -->
+        <div class="form-group">
+          <label class="form-label">Họ và tên</label>
+          <input
+            class="form-control"
+            name="fullName"
+            [(ngModel)]="occupantForm.fullName"
+            required
+          />
+        </div>
+        <!-- So dien thoai nguoi o cung. -->
+        <div class="form-group">
+          <label class="form-label">Số điện thoại</label>
+          <input
+            class="form-control"
+            name="phoneNumber"
+            [(ngModel)]="occupantForm.phoneNumber"
+            required
+          />
+        </div>
+        <!-- CCCD/CMND. -->
+        <div class="form-group">
+          <label class="form-label">Số CCCD / CMND</label>
+          <input class="form-control" name="identityCard" [(ngModel)]="occupantForm.identityCard" />
+        </div>
+        <!-- URL CCCD mat truoc. -->
+        <div class="form-group" hidden>
+          <label class="form-label">Ảnh CCCD mặt trước URL</label>
+          <input
+            class="form-control"
+            name="identityCardFrontUrl"
+            [(ngModel)]="occupantForm.identityCardFrontUrl"
+            placeholder="https://..."
+          />
+        </div>
+        <!-- URL CCCD mat sau. -->
+        <div class="form-group" hidden>
+          <label class="form-label">Ảnh CCCD mặt sau URL</label>
+          <input
+            class="form-control"
+            name="identityCardBackUrl"
+            [(ngModel)]="occupantForm.identityCardBackUrl"
+            placeholder="https://..."
+          />
+        </div>
+        <!-- Footer modal. -->
+        <div class="modal-footer p-0 border-0 mt-4 d-flex justify-content-end gap-2">
+          <button
+            type="button"
+            class="btn btn-outline"
+            [disabled]="isSavingOccupant"
+            (click)="closeOccupantModal()"
+          >
+            Hủy
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="isSavingOccupant">
+            <i
+              class="fas"
+              [class.fa-spinner]="isSavingOccupant"
+              [class.fa-spin]="isSavingOccupant"
+              [class.fa-save]="!isSavingOccupant"
+            ></i>
+            {{ isSavingOccupant ? 'Đang lưu...' : 'Lưu người ở cùng' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

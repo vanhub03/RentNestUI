@@ -20,6 +20,7 @@ import { LandlordServicesComponent } from './landlord/services/services.componen
 import { LandlordInvoicesComponent } from './landlord/invoices/invoices.component';
 import { TenantInvoicesComponent } from './tenant-invoices/tenant-invoices.component';
 import { PaymentInvoiceReturnComponent } from './payment-invoice-return/payment-invoice-return.component';
+import { TenantRoomsComponent } from './tenant-rooms/tenant-rooms.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -53,6 +54,7 @@ export const routes: Routes = [
         component: TenantLayoutComponent,
         children: [
           { path: 'my-requests', component: MyRequestsComponent },
+          { path: 'my-rooms', component: TenantRoomsComponent },
           { path: 'contract-preview/:requestId', component: ContractPreviewComponent },
           { path: 'payment-deposit/:requestId', component: PaymentDepositComponent },
           { path: 'payment-deposit/return', component: PaymentDepositComponent },

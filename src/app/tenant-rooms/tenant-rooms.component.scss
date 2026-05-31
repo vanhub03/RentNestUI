@@ -1,0 +1,76 @@
+/* Tieu de trang. */
+.page-title {
+  font-size: 1.5rem;
+}
+
+/* Layout card phong gom anh va thong tin. */
+.room-details-card {
+  display: flex;
+  gap: 1.5rem;
+}
+
+/* Anh dai dien phong. */
+.room-thumbnail {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  flex: 0 0 auto;
+}
+
+/* Tieu de ten phong. */
+.room-title {
+  font-size: 1.25rem;
+}
+
+/* Gia thue. */
+.rent-price {
+  font-size: 1.25rem;
+}
+
+/* Panel danh sach nguoi o cung. */
+.occupant-panel {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  background: var(--bg-alt);
+}
+
+/* Tieu de panel occupant. */
+.occupant-heading {
+  font-size: 1rem;
+}
+
+/* Danh sach occupant hien theo cot. */
+.occupant-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+/* Tung item occupant. */
+.occupant-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+}
+
+/* Modal them nguoi o cung. */
+.co-occupant-modal {
+  max-width: 560px;
+}
+
+/* Mobile: card phong ve mot cot. */
+@media (max-width: 768px) {
+  .room-details-card {
+    flex-direction: column;
+  }
+
+  .room-thumbnail {
+    width: 100%;
+    height: 200px;
+  }
+}
