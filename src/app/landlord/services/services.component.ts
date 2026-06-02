@@ -187,6 +187,7 @@ export class LandlordServicesComponent implements OnInit {
         this.serviceApi.deleteServices(service.id).subscribe({
           next: () => {
             this.toastr.success('Dịch vụ đã được xóa thành công');
+            this.loadServices();
           },
           error: (err) => {
             this.toastr.error(
