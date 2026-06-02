@@ -64,6 +64,13 @@
           <div class="d-flex justify-content-between item-row">
             <span class="text-muted">{{ item.description }}:</span>
             <span class="font-medium">{{ item.amount | number: '1.0-0' }}đ</span>
+            @if(item.oldIndex !== null){
+              <span class="font-medium">Số cũ: {{ item.oldIndex}}</span>
+            }
+            @if(item.newIndex !== null){
+              <span class="font-medium">Số mới: {{ item.newIndex}}</span>
+            }
+
           </div>
         }
       </div>
