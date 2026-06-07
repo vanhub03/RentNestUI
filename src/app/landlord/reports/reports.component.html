@@ -1,0 +1,130 @@
+<div class="admin-content">
+  <div class="card p-3 mb-4 report-toolbar">
+    <div class="d-flex gap-3 flex-wrap">
+      <select class="form-control" style="width: 220px" disabled>
+        <option>Loai: Doanh thu & Chi phi</option>
+      </select>
+      <input
+        type="month"
+        class="form-control"
+        [(ngModel)]="selectedMonth"
+        (change)="onMonthChange()"
+      />
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <!-- <button
+        class="btn btn-outline text-success"
+        style="border-color: var(--success)"
+        (click)="exportExcel()"
+      >
+        <i class="fas fa-file-excel"></i> Xuat Excel
+      </button>
+      <button
+        class="btn btn-outline text-danger"
+        style="border-color: var(--danger)"
+        (click)="exportPdf()"
+      >
+        <i class="fas fa-file-pdf"></i> Xuat PDF
+      </button> -->
+    </div>
+  </div>
+
+  <div class="d-grid gap-4 mb-4 report-stats">
+    <div class="card p-3 border-left info">
+      <div class="text-muted text-xs font-semibold text-uppercase mb-1">
+        Tong hoa don {{ selectedMonth }}
+      </div>
+      <div class="font-bold text-lg text-main">{{ report?.totalInvoices || 0 }}</div>
+    </div>
+    <div class="card p-3 border-left success">
+      <div class="text-muted text-xs font-semibold text-uppercase mb-1">Tong doanh thu</div>
+      <div class="font-bold text-lg text-success">
+        {{ formatCurrency(report?.totalRevenue) | number: '1.0-0' }}d
+      </div>
+    </div>
+    <div class="card p-3 border-left primary">
+      <div class="text-muted text-xs font-semibold text-uppercase mb-1">Da thu</div>
+      <div class="font-bold text-lg text-primary">
+        {{ formatCurrency(report?.paidAmount) | number: '1.0-0' }}d
+      </div>
+    </div>
+    <div class="card p-3 border-left danger">
+      <div class="text-muted text-xs font-semibold text-uppercase mb-1">Con no</div>
+      <div class="font-bold text-lg text-danger">
+        {{ formatCurrency(report?.debtAmount) | number: '1.0-0' }}d
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading" class="card p-4 text-center text-muted mb-4">
+    <i class="fas fa-spinner fa-spin me-2"></i> Dang tai bao cao...
+  </div>
+
+  <ng-container *ngIf="!isLoading">
+    <div class="d-grid gap-4 mb-4 report-charts">
+      <div class="card p-4">
+        <h3 class="font-semibold m-0 mb-3" style="font-size: 1.1rem">
+          Co cau doanh thu theo dich vu
+        </h3>
+        <div class="chart-box">
+          <canvas #revenueChart></canvas>
+          <div *ngIf="(report?.revenueStructure || []).length === 0" class="chart-empty">
+            Chua co du lieu
+          </div>
+        </div>
+      </div>
+      <div class="card p-4">
+        <h3 class="font-semibold m-0 mb-3" style="font-size: 1.1rem">Loi nhuan gop theo co so</h3>
+        <div class="chart-box">
+          <canvas #cashflowChart></canvas>
+          <div *ngIf="(report?.cashFlowByHostel || []).length === 0" class="chart-empty">
+            Chua co du lieu
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card p-0">
+      <div class="card-header border-0 bg-transparent">
+        <h3 class="font-semibold m-0" style="font-size: 1.1rem">
+          Bang chi tiet dong tien ({{ selectedMonth }})
+        </h3>
+      </div>
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Co so</th>
+              <th>Tong tien phong</th>
+              <th>Dien/nuoc + dich vu</th>
+              <th>Tong thu</th>
+              <!-- <th>Chi phi</th> -->
+              <!-- <th class="text-right">Loi nhuan gop</th> -->
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="(report?.cashFlowByHostel || []).length === 0">
+              <td colspan="6" class="text-center py-4 text-muted">Chua co hoa don trong ky nay.</td>
+            </tr>
+            @for (row of report?.cashFlowByHostel || []; track row.hostelId) {
+              <tr>
+                <td class="font-medium text-main">{{ row.hostelName }}</td>
+                <td>{{ formatCurrency(row.roomRevenue) | number: '1.0-0' }}d</td>
+                <td>{{ formatCurrency(row.serviceRevenue) | number: '1.0-0' }}d</td>
+                <td class="font-bold text-success">
+                  {{ formatCurrency(row.totalRevenue) | number: '1.0-0' }}d
+                </td>
+                <!-- <td class="text-danger">
+                  - {{ formatCurrency(row.expenseAmount) | number: '1.0-0' }}d
+                </td> -->
+                <!-- <td class="font-bold text-primary text-right text-lg">
+                  {{ formatCurrency(row.grossProfit) | number: '1.0-0' }}d
+                </td> -->
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </ng-container>
+</div>

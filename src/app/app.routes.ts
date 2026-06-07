@@ -21,6 +21,7 @@ import { LandlordInvoicesComponent } from './landlord/invoices/invoices.componen
 import { TenantInvoicesComponent } from './tenant-invoices/tenant-invoices.component';
 import { PaymentInvoiceReturnComponent } from './payment-invoice-return/payment-invoice-return.component';
 import { TenantRoomsComponent } from './tenant-rooms/tenant-rooms.component';
+import { LandlordReportComponent } from './landlord/reports/reports.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -38,6 +39,7 @@ export const routes: Routes = [
       { path: 'contract-preview/:requestId', component: ContractPreviewComponent },
       { path: 'services', component: LandlordServicesComponent },
       { path: 'invoices', component: LandlordInvoicesComponent },
+      { path: 'reports', component: LandlordReportComponent },
       { path: '', redirectTo: 'rooms', pathMatch: 'full' },
     ],
   },
