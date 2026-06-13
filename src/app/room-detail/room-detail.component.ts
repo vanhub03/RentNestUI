@@ -6,6 +6,7 @@ import { RoomService } from '../_services/room.service';
 import { ToastrService } from 'ngx-toastr';
 import { StorageService } from '../_services/storage.service';
 import { BookingService } from '../_services/booking.service';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-room-detail',
@@ -30,6 +31,9 @@ export class RoomDetailComponent implements OnInit {
   isGalleryOpen = false;
   currentImageIndex = 0;
   today!: string;
+  mapEmbedUrl: SafeResourceUrl | null = null;
+  mapDirectionUrl: string = '';
+
   constructor(
     private route: ActivatedRoute,
     private roomService: RoomService,
@@ -38,6 +42,7 @@ export class RoomDetailComponent implements OnInit {
     private storageService: StorageService,
     private router: Router,
     private bookingService: BookingService,
+    private sanitizer: DomSanitizer,
   ) {}
   ngOnInit(): void {
     const now = new Date();
@@ -61,6 +66,21 @@ export class RoomDetailComponent implements OnInit {
     };
     console.log(this.user);
   }
+
+  prepareMapLinks(): void {
+    const address = this.room?.fullAddress?.trim();
+    if (!address) {
+      this.mapEmbedUrl = null;
+      this.mapDirectionUrl = '';
+      return;
+    }
+
+    const encodeAddress = encodeURIComponent(address);
+    const embeUrl = `https://www.google.com/maps?q=${encodeAddress}&output=embed`;
+    this.mapEmbedUrl = this.sanitizer.bypassSecurityTrustResourceUrl(embeUrl);
+    this.mapDirectionUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeAddress}`;
+  }
+
   openGallery(index: number) {
     if (this.room && this.room.images && this.room.images.length > 0) {
       this.currentImageIndex = index;
@@ -97,6 +117,7 @@ export class RoomDetailComponent implements OnInit {
           description: res?.description ?? '',
         };
         this.isLoading = false;
+        this.prepareMapLinks();
         this.cdr.detectChanges();
       },
       error: () => {

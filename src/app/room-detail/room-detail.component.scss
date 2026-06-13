@@ -91,6 +91,45 @@
   background: #f8f9fa;
 }
 
+.map-frame-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.map-frame {
+  position: relative;
+  height: 320px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  background: var(--bg-alt);
+  box-shadow: var(--shadow-sm);
+}
+
+.map-frame iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+  pointer-events: none; /* De click vao bat ky dau trong frame deu mo Google Maps chi duong. */
+}
+
+.map-open-hint {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.85rem;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--text-main);
+  font-weight: 600;
+  box-shadow: var(--shadow-md);
+}
+
 /* Responsive trên Mobile: Rút gọn chỉ còn 1 ảnh to */
 @media (max-width: 768px) {
   .gallery-grid {
@@ -100,6 +139,16 @@
   }
   .gallery-item:nth-child(n + 2) {
     display: none; /* Ẩn từ ảnh thứ 2 trở đi */
+  }
+
+  .map-frame {
+    height: 240px;
+  }
+
+  .map-open-hint {
+    left: 0.75rem;
+    right: 0.75rem;
+    justify-content: center;
   }
 }
 /* ================= LIGHTBOX GALLERY ================= */

@@ -239,6 +239,7 @@ export class LandLordRoomsComponent implements OnInit {
     // this.newHostel.districtCode = '';
     if (wardCode == '') {
       this.newHostel.wardCode = '';
+      this.newHostel.ward = '';
     }
     // this.districts = [];
     this.wards = [];
@@ -254,6 +255,9 @@ export class LandLordRoomsComponent implements OnInit {
         .subscribe(
           (res: any) => {
             this.wards = res.wards;
+            if (wardCode || this.newHostel.wardCode) {
+              this.syncHostelLocationNames();
+            }
             this.isWardLoading = false;
             this.cdr.detectChanges();
           },
@@ -289,11 +293,21 @@ export class LandLordRoomsComponent implements OnInit {
   // }
 
   onWardChange() {
-    if (this.newHostel.wardCode) {
-      const selectWard = this.wards.find((n) => n.code == this.newHostel.wardCode);
-      console.log(selectWard);
-      if (selectWard) this.newHostel.ward = selectWard.name;
-      console.log(this.newHostel.ward);
+    this.syncHostelLocationNames();
+  }
+
+  syncHostelLocationNames(): void {
+    const selectedProvince = this.provinces.find(
+      (p) => String(p.code) == String(this.newHostel.cityCode),
+    );
+    if (selectedProvince) this.newHostel.city = selectedProvince.name;
+
+    const selectedWard = this.wards.find((w) => String(w.code) == String(this.newHostel.wardCode));
+    if (selectedWard) {
+      this.newHostel.ward = selectedWard.name;
+      this.newHostel.district = selectedWard.district?.name || this.newHostel.district || '';
+      this.newHostel.districtCode =
+        selectedWard.district?.code || this.newHostel.districtCode || '';
     }
   }
 
@@ -460,6 +474,7 @@ export class LandLordRoomsComponent implements OnInit {
     }
 
     const formData = new FormData();
+    this.syncHostelLocationNames();
     formData.append('hostels', JSON.stringify(this.newHostel));
     for (const file of this.selectedFiles) {
       formData.append('images', file);
@@ -535,13 +550,15 @@ export class LandLordRoomsComponent implements OnInit {
       id: hostel.id,
       name: hostel.name,
       cityCode: hostel.cityCode?.toString() || '',
+      city: hostel.city || '',
       districtCode: hostel.districtCode?.toString() || '',
+      district: hostel.district || '',
       wardCode: hostel.wardCode?.toString() || '',
+      ward: hostel.ward || '',
       addressDetail: hostel.addressDetail || '',
       description: hostel.description || '',
     };
     if (this.newHostel.cityCode) this.onProvinceChange(this.newHostel.wardCode);
-    if (this.newHostel.wardCode) this.onWardChange();
     this.imagePreviews = hostel.images;
     this.isHostelModalOpen = true;
   }
