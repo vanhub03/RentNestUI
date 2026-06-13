@@ -19,6 +19,10 @@ export class LandlordTenantsComponent implements OnInit {
   totalPages = 0;
   totalElements = 0;
   size = 5;
+  selectedTenant: any = null;
+  isDetailLoading: boolean = true;
+  detailError: string = '';
+
   constructor(
     private cdr: ChangeDetectorRef,
     private tenantService: TenantService,
@@ -63,5 +67,36 @@ export class LandlordTenantsComponent implements OnInit {
       this.page = newPage;
       this.loadTenants();
     }
+  }
+
+  openDetail(tenant: any) {
+    //lay luon thong tin cua dong tenant tren FE de phan hoi truoc cho user
+    this.selectedTenant = tenant;
+    this.isDetailLoading = true;
+    this.detailError = '';
+    this.cdr.detectChanges();
+
+    this.tenantService.getLandlordTenantDetail(tenant.id).subscribe({
+      next: (res) => {
+        this.selectedTenant = res;
+        this.isDetailLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.detailError = 'Không tải được chi tiết khách thuê.';
+        this.isDetailLoading = false;
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  closeDetail() {
+    this.selectedTenant = null;
+    this.isDetailLoading = false;
+    this.detailError = '';
+  }
+
+  hasCccdImages(tenant: any): boolean {
+    return !!(tenant?.identityCardFrontUrl || tenant?.identityCardBackUrl);
   }
 }
