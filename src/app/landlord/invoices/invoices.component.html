@@ -61,17 +61,17 @@
             <th>Điện Nước + DV</th>
             <th>Tổng Phải Thu</th>
             <th>Trạng Thái</th>
-            <th class="text-right">Hành động</th>
+            <!-- <th class="text-right">Hành động</th> -->
           </tr>
         </thead>
         <tbody>
           <tr *ngIf="isLoading">
-            <td colspan="9" class="text-center py-4 text-muted">
+            <td colspan="8" class="text-center py-4 text-muted">
               <i class="fas fa-spinner fa-spin me-2"></i> Đang tải hóa đơn...
             </td>
           </tr>
           <tr *ngIf="!isLoading && invoices.length === 0">
-            <td colspan="9" class="text-center py-4 text-muted">Chưa có hóa đơn trong kỳ này.</td>
+            <td colspan="8" class="text-center py-4 text-muted">Chưa có hóa đơn trong kỳ này.</td>
           </tr>
           @for (invoice of invoices; track invoice.id) {
             <tr>
@@ -91,24 +91,24 @@
                   {{ getStatusLabel(invoice.status) }}
                 </span>
               </td>
-              <td class="text-right">
-                <div class="action-group justify-content-end">
-                  <button class="btn btn-sm btn-outline" title="Chi tiết/Sửa">
+              <!-- <td class="text-right">
+                <div class="action-group justify-content-end"> -->
+                  <!-- <button class="btn btn-sm btn-outline" title="Chi tiết/Sửa">
                     <i class="fas fa-edit"></i>
-                  </button>
-                  <button
+                  </button> -->
+                  <!-- <button
                     *ngIf="invoice.status !== 'PAID'"
                     class="btn btn-sm btn-outline text-success"
                     title="Xác nhận đã thu tiền"
                     (click)="markPaid(invoice)"
                   >
                     <i class="fas fa-check"></i>
-                  </button>
-                  <button class="btn btn-sm btn-outline text-primary" title="Gửi nhắc nợ" disabled>
+                  </button> -->
+                  <!-- <button class="btn btn-sm btn-outline text-primary" title="Gửi nhắc nợ" disabled>
                     <i class="fas fa-bell"></i>
-                  </button>
-                </div>
-              </td>
+                  </button> -->
+                <!-- </div>
+              </td> -->
             </tr>
           }
         </tbody>

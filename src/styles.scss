@@ -271,6 +271,9 @@ p {
 .grid-cols-4 {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
+.grid-cols-5 {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
 
 /* Spacing */
 .m-0 {
@@ -638,6 +641,7 @@ select.form-control {
   top: 1rem;
   left: 1rem;
   z-index: 2;
+  
 }
 
 /* --- Badges --- */
@@ -669,12 +673,12 @@ select.form-control {
 }
 
 .badge-danger {
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: rgba(239, 68, 68, 0.777);
   color: var(--danger);
 }
 
 .badge-info {
-  background-color: rgba(59, 130, 246, 0.1);
+  background-color: rgba(228, 8, 8, 0.903);
   color: var(--info);
 }
 

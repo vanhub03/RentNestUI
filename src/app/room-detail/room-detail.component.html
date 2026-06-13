@@ -15,7 +15,7 @@
           >
             {{ room.status === 'AVAILABLE' ? 'Còn phòng' : 'Đang thuê' }}
           </span>
-          <span class="badge" style="background: var(--bg-alt); color: var(--text-main)">
+          <span class="badge" style="background: var(--bg-alt); color: red">
             <i class="fas fa-check-circle text-primary"></i> Đã xác thực
           </span>
         </div>
@@ -222,6 +222,7 @@
             <label class="form-label">CMND / CCCD <span class="text-danger">*</span></label>
             <input
               type="text"
+              maxlength="12"
               class="form-control"
               name="cccd"
               [(ngModel)]="bookingForm.cccd"

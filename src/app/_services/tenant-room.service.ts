@@ -12,7 +12,7 @@ export class TenantRoomService {
     return this.http.get(`${enviroment.apiUrl}/tenant/rooms`);
   }
 
-  addCoOccupant(roomId: number, payload: any): Observable<any> {
+  addCoOccupant(roomId: number, payload: FormData): Observable<any> {
     return this.http.post(`${enviroment.apiUrl}/tenant/rooms/${roomId}/occupants`, payload);
   }
 }

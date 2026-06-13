@@ -18,6 +18,8 @@ export class TenantRoomsComponent implements OnInit {
   isLoading = true;
   isSavingOccupant = false; //loading khi them nguoi o cung
   occupantForm: any = this.emptyOccupantForm();
+  cccdFrontFile: File | null = null;
+  cccdBackFile: File | null = null;
 
   constructor(
     private tenantRoomService: TenantRoomService, //goi api phong dang thue
@@ -64,6 +66,8 @@ export class TenantRoomsComponent implements OnInit {
   openOccupantModal(room: any) {
     this.selectedRoom = room;
     this.occupantForm = this.emptyOccupantForm();
+    this.cccdBackFile = null;
+    this.cccdFrontFile = null;
   }
 
   closeOccupantModal() {
@@ -83,6 +87,26 @@ export class TenantRoomsComponent implements OnInit {
     };
   }
 
+  onCccdFrontChange(event: Event): void{
+    this.cccdFrontFile = this.readSelectedImage(event);
+  }
+  onCccdBackChange(event: Event): void{
+    this.cccdBackFile = this.readSelectedImage(event);
+  }
+
+  private readSelectedImage(event: Event): File | null {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] || null;
+    if(!file){
+      return null;
+    }
+    if(!file.type.startsWith('image/')){
+      this.toastr.warning('File cccd phai la hinh anh')
+      return null;
+    }
+    return file
+  }
+
   addCoOccupant(): void {
     if (!this.selectedRoom?.roomId) {
       //khong co phong thi khong xu ly
@@ -92,13 +116,28 @@ export class TenantRoomsComponent implements OnInit {
       this.toastr.warning('Vui lòng nhập họ tên và số điện thoại người ở cùng');
       return;
     }
+    if(!this.cccdFrontFile || !this.cccdBackFile){
+      this.toastr.warning('Vui long upload anh CCCD mat truoc va mat sau');
+      return;
+    }
 
     this.isSavingOccupant = true;
-    this.tenantRoomService.addCoOccupant(this.selectedRoom.roomId, this.occupantForm).subscribe({
+    const formData = new FormData();
+    const data = {
+      fullName: this.occupantForm.fullName,
+      phoneNumber: this.occupantForm.phoneNumber,
+      identityCard: this.occupantForm.identityCard
+    }
+    formData.append('data', JSON.stringify(data));
+    formData.append('cccdFront', this.cccdFrontFile as File);
+    formData.append('cccdBack', this.cccdBackFile as File);
+    this.tenantRoomService.addCoOccupant(this.selectedRoom.roomId, formData).subscribe({
       next: (res) => {
         this.rooms = this.rooms.map((room) => (room.roomId === res.roomId ? res : room)); //cap nhat lai phong trong danh sach
         this.selectedRoom = res; //cap nhap modal bang dach sach ocuupant tra ve
         this.occupantForm = this.emptyOccupantForm(); //reset form ve blank
+        this.cccdFrontFile = null;
+        this.cccdBackFile = null
         this.isSavingOccupant = false; //tat loading
         this.toastr.success('Đã khai báo thêm người ở cùng');
         this.closeOccupantModal();

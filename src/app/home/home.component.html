@@ -65,7 +65,7 @@
         <h2 class="font-bold">Hệ Sinh Thái Quản Lý Toàn Diện</h2>
       </div>
 
-      <div class="d-grid grid-cols-3 gap-4">
+      <div class="d-grid grid-cols-3 gap-3">
         <div
           class="card card-hover p-4 border-0 reveal-left"
           style="background-color: var(--bg-main)"
@@ -120,13 +120,13 @@
         ></a>
       </div>
 
-      <div class="d-grid grid-cols-4 gap-4">
+      <div class="d-grid grid-cols-5 gap-3">
         @for (roomItem of latestRooms; track roomItem.id) {
           <a [routerLink]="['/rooms', roomItem.id]" style="color: inherit; text-decoration: none">
-            <app-room-card class="reveal" style="display: block" [room]="roomItem"></app-room-card>
+            <app-room-card class="reveal" style="display: block" [style]="" [room]="roomItem"></app-room-card>
           </a>
         } @empty {
-          <div class="col-span-4 text-center py-5 text-muted reveal">
+          <div class="col-span-5 text-center py-5 text-muted reveal">
             Chưa có phòng trọ nào được đăng.
           </div>
         }

@@ -33,7 +33,12 @@
                 </div>
               </div>
             </div>
-            <span class="badge badge-warning text-white contract-status-badge" style="color: white">
+            <span class="badge" 
+            [ngClass]="{
+        'badge-success': contract.status === 'DRAFT',
+        'badge-warning': contract.status === 'WAITING_FOR_SIGNATURE',
+        'badge-info': contract.status === 'ACTIVE',
+      }">
               <i [class]="isLandlord ? 'fas fa-hourglass-half' : 'fas fa-pen'"></i>
               {{ statusLabel }}
             </span>

@@ -20,8 +20,4 @@ export class TenantService {
   onboardTenant(formData: FormData): Observable<any> {
     return this.http.post(`${enviroment.apiUrl}/landlord/contracts/onboard`, formData);
   }
-
-  getLandlordTenantDetail(id: number): Observable<any> {
-    return this.http.get(`${enviroment.apiUrl}/landlord/tenants/${id}`);
-  }
 }
