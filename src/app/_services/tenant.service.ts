@@ -24,4 +24,8 @@ export class TenantService {
   getLandlordTenantDetail(id: number): Observable<any> {
     return this.http.get(`${enviroment.apiUrl}/landlord/tenants/${id}`);
   }
+
+  addOccupantsToRentedRoom(roomId: number, formData: FormData): Observable<any> {
+    return this.http.post(`${enviroment.apiUrl}/landlord/rooms/${roomId}/occupants`, formData);
+  }
 }

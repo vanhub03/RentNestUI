@@ -6,6 +6,16 @@ import { TenantService } from '../../_services/tenant.service';
 import { RouterLink } from '@angular/router';
 import { RoomService } from '../../_services/room.service';
 
+interface OccupantForm {
+  fullName: string;
+  phoneNumber: string;
+  identityCard: string;
+  isRepresentative: boolean;
+  cccdFrontFile: File | null;
+  cccdFrontPreview: string;
+  cccdBackFile: File | null;
+  cccdBackPreview: string;
+}
 @Component({
   selector: 'app-add-tenant',
   standalone: true,
@@ -18,11 +28,11 @@ export class AddTenantComponent implements OnInit {
   isSuccess = false;
   isSubmitting = false;
 
-  availableRooms: any[] = [];
+  rooms: any[] = [];
   isLoadingRooms = true;
   formData = {
     roomId: null as any,
-    occupants: [{ fullName: '', phoneNumber: '', identityCard: '', isRepresentative: true }],
+    occupants: [this.createOccupant(true)],
     startDate: new Date().toISOString().split('T')[0],
     endDate: null,
     depositAmount: 0,
@@ -30,12 +40,6 @@ export class AddTenantComponent implements OnInit {
   };
   contractFile: File | null = null;
   contractFileName: string = '';
-
-  cccdFrontFile: File | null = null;
-  cccdFrontPreview: string = '';
-
-  cccdBackFile: File | null = null;
-  cccdBackPreview: string = '';
   displayDepositAmount: string = '';
 
   constructor(
@@ -46,23 +50,101 @@ export class AddTenantComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadAvailableRooms();
+    this.loadRooms();
   }
 
-  loadAvailableRooms() {
+  private createOccupant(isRepresentative: boolean): OccupantForm {
+    return {
+      fullName: '',
+      phoneNumber: '',
+      identityCard: '',
+      isRepresentative,
+      cccdFrontFile: null,
+      cccdFrontPreview: '',
+      cccdBackFile: null,
+      cccdBackPreview: '',
+    };
+  }
+
+  // loadAvailableRooms() {
+  //   this.isLoadingRooms = true;
+  //   this.cdr.detectChanges();
+  //   this.roomService.getAvailableRooms().subscribe({
+  //     next: (res) => {
+  //       this.availableRooms = res || [];
+  //       this.isLoadingRooms = false;
+  //       this.cdr.detectChanges();
+  //     },
+  //     error: (err) => {
+  //       this.availableRooms = [];
+  //       this.isLoadingRooms = false;
+  //       this.cdr.detectChanges();
+  //     },
+  //   });
+  // }
+  loadRooms(): void {
     this.isLoadingRooms = true;
-    this.cdr.detectChanges();
-    this.roomService.getAvailableRooms().subscribe({
+    this.roomService.getLandlordRooms({ page: 0, size: 1000 }).subscribe({
       next: (res) => {
-        this.availableRooms = res || [];
+        const content = Array.isArray(res) ? res : (res?.content ?? []);
+        this.rooms = content.filter((room: any) => ['AVAILABLE', 'RENTED'].includes(room.status));
         this.isLoadingRooms = false;
         this.cdr.detectChanges();
       },
       error: (err) => {
-        this.availableRooms = [];
+        this.rooms = [];
         this.isLoadingRooms = false;
         this.cdr.detectChanges();
+        this.toastr.error('Không thể tải danh sách phòng, vui lòng thử lại sau');
       },
+    });
+  }
+
+  get selectedRoomObj(): any {
+    return this.rooms.find((room) => room.id === this.formData.roomId);
+  }
+
+  get isRentedRoom(): boolean {
+    return this.selectedRoomObj?.status === 'RENTED';
+  }
+
+  get representative(): OccupantForm {
+    return (
+      this.formData.occupants.find((occupant) => occupant.isRepresentative) ??
+      this.formData.occupants[0]
+    );
+  }
+
+  selectRoom(room: any): void {
+    this.formData.roomId = room.id;
+    this.formData.occupants.forEach((occupant, index) => {
+      occupant.isRepresentative = room.status === 'AVAILABLE' && index === 0;
+    });
+  }
+
+  addOccupant(): void {
+    this.formData.occupants.push(this.createOccupant(false));
+  }
+
+  removeOccupant(index: number): void {
+    if (this.formData.occupants.length === 1) return;
+    this.revokePreviewUrls(this.formData.occupants[index]);
+    const removedRepresentative = this.formData.occupants[index].isRepresentative;
+    this.formData.occupants.splice(index, 1);
+    if (!this.isRentedRoom && removedRepresentative) {
+      this.formData.occupants[0].isRepresentative = true;
+    }
+  }
+
+  private revokePreviewUrls(occupant: OccupantForm) {
+    if (occupant.cccdFrontPreview) URL.revokeObjectURL(occupant.cccdFrontPreview);
+    if (occupant.cccdBackPreview) URL.revokeObjectURL(occupant.cccdBackPreview);
+  }
+
+  setRepresentative(index: number): void {
+    if (this.isRentedRoom) return;
+    this.formData.occupants.forEach((occupant, i) => {
+      occupant.isRepresentative = i === index;
     });
   }
 
@@ -70,18 +152,27 @@ export class AddTenantComponent implements OnInit {
     document.getElementById(inputId)?.click();
   }
 
-  onCccdSelected(event: any, side: 'front' | 'back') {
-    const file = event.target.files[0];
-    if (file) {
-      const previewUrl = URL.createObjectURL(file);
-      if (side === 'front') {
-        this.cccdFrontFile = file;
-        this.cccdFrontPreview = previewUrl;
-      } else {
-        this.cccdBackFile = file;
-        this.cccdBackPreview = previewUrl;
-      }
+  onCccdSelected(event: Event, index: number, side: 'front' | 'back') {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      this.toastr.warning('File CCC phải là hình ảnh');
+      input.value = '';
+      return;
     }
+    const occupant = this.formData.occupants[index];
+    const previewUrl = URL.createObjectURL(file);
+    if (side === 'front') {
+      if (occupant.cccdFrontPreview) URL.revokeObjectURL(occupant.cccdFrontPreview);
+      occupant.cccdFrontFile = file;
+      occupant.cccdFrontPreview = previewUrl;
+    } else {
+      if (occupant.cccdBackPreview) URL.revokeObjectURL(occupant.cccdBackPreview);
+      occupant.cccdBackFile = file;
+      occupant.cccdBackPreview = previewUrl;
+    }
+    input.value = '';
   }
 
   onContractSelected(event: any) {
@@ -97,6 +188,14 @@ export class AddTenantComponent implements OnInit {
     this.currentStep = step;
   }
 
+  continueAfterOccupants(): void {
+    if (!this.validateOccupants()) return;
+    this.currentStep = this.isRentedRoom ? 4 : 3;
+  }
+  backFromConfirmation(): void {
+    this.currentStep = this.isRentedRoom ? 2 : 3;
+  }
+
   validateCurrentStep(): boolean {
     if (this.currentStep === 1 && !this.formData.roomId) {
       this.toastr.warning('Vui lòng chọn 1 phòng trống');
@@ -110,33 +209,21 @@ export class AddTenantComponent implements OnInit {
     return true;
   }
 
-  addOccupant() {
-    this.formData.occupants.push({
-      fullName: '',
-      phoneNumber: '',
-      identityCard: '',
-      isRepresentative: false,
-    });
-  }
-  removeOccupant(index: number) {
-    if (this.formData.occupants.length <= 1) return;
-    const wasRep = this.formData.occupants[index].isRepresentative;
-    this.formData.occupants.splice(index, 1);
-    if (wasRep && this.formData.occupants.length > 0) {
-      this.formData.occupants[0].isRepresentative = true;
+  validateOccupants(): boolean {
+    for (let index = 0; index < this.formData.occupants.length; index++) {
+      const occupant = this.formData.occupants[index];
+      if (!occupant.fullName.trim() || !occupant.phoneNumber.trim()) {
+        this.toastr.warning(
+          `Vui lòng nhập đủ họ tên và số điện thoại cho người thuê thứ ${index + 1}`,
+        );
+        return false;
+      }
+      if (!occupant.cccdFrontFile || !occupant.cccdBackFile) {
+        this.toastr.warning(`Vui lòng upload dủ 2 mặt ảnh CCCD cho người thứ ${index + 1}`);
+        return false;
+      }
     }
-  }
-
-  setRepresentative(index: number) {
-    this.formData.occupants.forEach((o, i) => (o.isRepresentative = i === index));
-  }
-
-  get representative() {
-    return this.formData.occupants.find((o) => o.isRepresentative) || this.formData.occupants[0];
-  }
-
-  get selectedRoomObj() {
-    return this.availableRooms.find((r) => r.id === this.formData.roomId);
+    return true;
   }
 
   formatDeposit(event: any) {
@@ -187,21 +274,14 @@ export class AddTenantComponent implements OnInit {
   }
 
   submitForm() {
-    if (this.formData.depositAmount === null || this.formData.depositAmount === undefined) {
-      this.toastr.warning('Vui lòng nhật số tiền đặt cọc');
-      return;
-    }
+    if (this.isSubmitting || !this.validateOccupants() || !this.formData.roomId) return;
 
     this.isSubmitting = true;
-    this.cdr.detectChanges();
-
-    const payload = new FormData();
-    payload.append('data', JSON.stringify(this.formData));
-    if (this.contractFile) payload.append('contractFile', this.contractFile);
-    if (this.cccdFrontFile) payload.append('cccdFront', this.cccdFrontFile);
-    if (this.cccdBackFile) payload.append('cccdBack', this.cccdBackFile);
-
-    this.tenantService.onboardTenant(payload).subscribe({
+    const payload = this.buildMultipartPayload();
+    const request$ = this.isRentedRoom
+      ? this.tenantService.addOccupantsToRentedRoom(this.formData.roomId, payload)
+      : this.tenantService.onboardTenant(payload);
+    request$.subscribe({
       next: (res: any) => {
         this.isSubmitting = false;
         this.isSuccess = true;
@@ -214,5 +294,39 @@ export class AddTenantComponent implements OnInit {
         this.cdr.detectChanges();
       },
     });
+  }
+
+  private buildMultipartPayload(): FormData {
+    const payload = new FormData();
+    const occupants = this.formData.occupants.map((occupant) => {
+      const payloadOccupant: any = {
+        fullName: occupant.fullName.trim(),
+        phoneNumber: occupant.phoneNumber.trim(),
+        identityCard: occupant.identityCard.trim(),
+      };
+      if (!this.isRentedRoom) {
+        payloadOccupant.isRepresentative = occupant.isRepresentative;
+      }
+      return payloadOccupant;
+    });
+    const data = this.isRentedRoom
+      ? { occupants }
+      : {
+          roomId: this.formData.roomId,
+          occupants,
+          startDate: this.formData.startDate,
+          endDate: this.formData.endDate,
+          depositAmount: this.formData.depositAmount,
+          depositMethod: this.formData.depositMethod,
+        };
+    payload.append('data', JSON.stringify(data));
+    this.formData.occupants.forEach((occupant) => {
+      payload.append('cccdFronts', occupant.cccdFrontFile as File);
+      payload.append('cccdBacks', occupant.cccdBackFile as File);
+    });
+    if (!this.isRentedRoom && this.contractFile) {
+      payload.append('contractFile', this.contractFile);
+    }
+    return payload;
   }
 }

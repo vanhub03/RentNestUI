@@ -86,18 +86,6 @@
 
 .wizard-step.active {
   display: block;
-  animation: fadeSlideIn 0.3s ease-out;
-}
-
-@keyframes fadeSlideIn {
-  from {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
 }
 
 .wizard-card {
@@ -133,19 +121,6 @@
   scrollbar-gutter: stable;
 }
 
-.room-select-list::-webkit-scrollbar {
-  width: 8px;
-}
-
-.room-select-list::-webkit-scrollbar-thumb {
-  background: rgba(107, 114, 128, 0.35);
-  border-radius: 999px;
-}
-
-.room-select-list::-webkit-scrollbar-track {
-  background: transparent;
-}
-
 .wizard-footer {
   padding: 1.25rem 1.75rem;
   border-top: 1px solid var(--border-color, #e5e7eb);
@@ -165,6 +140,9 @@
   display: flex;
   align-items: center;
   gap: 1rem;
+  width: 100%;
+  background: #fff;
+  color: inherit;
 }
 
 .room-select-card:hover {
@@ -215,57 +193,39 @@
   white-space: nowrap;
 }
 
-/* Occupant Table */
-.occupant-table {
+.room-thumbnail {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.room-thumbnail img {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
+  height: 100%;
+  object-fit: cover;
 }
 
-.occupant-table thead th {
-  background: var(--bg-alt, #f9fafb);
-  padding: 0.75rem 1rem;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--text-muted, #6b7280);
-  font-weight: 600;
-  border-bottom: 1px solid var(--border-color, #e5e7eb);
-  text-align: left;
+.room-status {
+  border-radius: 999px;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.7rem;
+  font-weight: 700;
 }
 
-.occupant-table thead th:first-child {
-  border-radius: var(--radius-md, 0.375rem) 0 0 0;
+.room-status.available {
+  color: #047857;
+  background: #d1fae5;
 }
 
-.occupant-table thead th:last-child {
-  border-radius: 0 var(--radius-md, 0.375rem) 0 0;
-  text-align: center;
-  width: 50px;
-}
-
-.occupant-table tbody td {
-  padding: 0.625rem 0.5rem;
-  border-bottom: 1px solid var(--border-color, #e5e7eb);
-  vertical-align: middle;
-}
-
-.occupant-table .form-control {
-  font-size: 0.9rem;
-  padding: 0.5rem 0.75rem;
-}
-
-.occupant-table .rep-radio {
-  text-align: center;
-  padding-top: 0.75rem;
-}
-
-.occupant-table .rep-radio input[type='radio'] {
-  width: 18px;
-  height: 18px;
-  accent-color: var(--primary, #0f52ba);
-  cursor: pointer;
-  margin: 0;
+.room-status.rented {
+  color: #b45309;
+  background: #fef3c7;
 }
 
 .btn-remove-row {
@@ -310,6 +270,115 @@
 .btn-add-occupant:hover {
   background: rgba(15, 82, 186, 0.12);
   border-color: var(--primary, #0f52ba);
+}
+
+.occupant-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.occupant-card {
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  background: #fff;
+}
+
+.occupant-card-header,
+.identity-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.occupant-fields,
+.contract-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.occupant-fields .form-group:last-child {
+  grid-column: 1 / -1;
+}
+
+.representative-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.5rem 0 1rem;
+  cursor: pointer;
+}
+
+.representative-option input {
+  accent-color: var(--primary, #0f52ba);
+}
+
+.identity-title {
+  margin: 0.75rem 0;
+  font-weight: 600;
+}
+
+.identity-upload-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.identity-upload {
+  width: 100%;
+  height: 150px;
+  padding: 0;
+  overflow: hidden;
+  color: #64748b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.identity-upload img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.contract-upload {
+  width: 100%;
+  min-height: 120px;
+  color: #64748b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.flow-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: 0.75rem;
+  color: #1d4ed8;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+}
+
+.flow-notice.rented {
+  color: #047857;
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+}
+
+.identity-complete {
+  color: #059669;
+  font-size: 0.8rem;
+  font-weight: 600;
 }
 
 .rep-badge {
@@ -381,22 +450,6 @@
   flex-shrink: 0;
 }
 
-.app-link-note {
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.06), rgba(139, 92, 246, 0.02));
-  border: 1px solid rgba(139, 92, 246, 0.15);
-  border-radius: var(--radius-md, 0.375rem);
-  padding: 1rem 1.25rem;
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-}
-
-.app-link-note i {
-  color: #8b5cf6;
-  margin-top: 2px;
-  font-size: 1.1rem;
-}
-
 .cccd-upload-area {
   border: 2px dashed var(--border-color, #e5e7eb);
   border-radius: var(--radius-md, 0.375rem);
@@ -431,26 +484,11 @@
   align-items: center;
   justify-content: center;
   margin: 0 auto 1.5rem;
-  animation: successPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .success-big-icon i {
   font-size: 3rem;
   color: var(--success, #10b981);
-}
-
-@keyframes successPop {
-  0% {
-    transform: scale(0);
-    opacity: 0;
-  }
-  50% {
-    transform: scale(1.15);
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
 }
 
 @media (max-width: 768px) {
@@ -467,5 +505,21 @@
   .room-select-list {
     max-height: min(46vh, 360px);
     padding-right: 0.25rem;
+  }
+  .room-select-card {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .room-select-price {
+    width: 100%;
+    padding-left: 36px;
+  }
+  .occupant-fields,
+  .contract-fields,
+  .identity-upload-grid {
+    grid-template-columns: 1fr;
+  }
+  .occupant-fields .form-group:last-child {
+    grid-column: auto;
   }
 }
