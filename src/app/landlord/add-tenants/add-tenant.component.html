@@ -121,7 +121,8 @@
                   <th style="width: 40px">#</th>
                   <th>Họ và Tên <span class="text-danger">*</span></th>
                   <th>Số điện thoại <span class="text-danger">*</span></th>
-                  <th>CCCD</th>
+                  <th>CCCD
+                  </th>
                   <th style="text-align: center">Đại diện</th>
                   <th></th>
                 </tr>
@@ -152,6 +153,7 @@
                         class="form-control"
                         [(ngModel)]="occ.identityCard"
                         placeholder="Số CCCD"
+                        maxlength="12"
                       />
                     </td>
                     <td class="rep-radio">
@@ -611,7 +613,7 @@
         Kích Hoạt Thành Công!
       </h2>
       <p style="color: #64748b; margin-bottom: 1.5rem">
-        Phòng đã chuyển trạng thái <strong style="color: #475569">ĐANG THUÊ</strong> (OCCUPIED).
+        Phòng đã chuyển trạng thái <strong style="color: #475569">ĐANG THUÊ</strong> (RENTED).
       </p>
 
       <div
@@ -683,7 +685,7 @@
                   font-size: 0.75rem;
                   font-weight: 600;
                 "
-                >OCCUPIED</span
+                >RENTED</span
               >
             </div>
           </div>
