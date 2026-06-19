@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ContractService } from '../../_services/contract.service';
 import { ToastrService } from 'ngx-toastr';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-landlord-contracts',
@@ -16,6 +17,11 @@ export class LandlordContractsComponent implements OnInit {
   totalPages = 0;
   isLoading = true;
   contracts: any[] = [];
+  previewModalOpen = false;
+  previewTitle = '';
+  previewType: 'image' | 'pdf' | 'office' | 'unsupported' = 'unsupported';
+  previewUrl = '';
+  safePreviewUrl: SafeResourceUrl | null = null;
   filter = {
     status: '',
     page: 0,
@@ -25,7 +31,9 @@ export class LandlordContractsComponent implements OnInit {
     private contractService: ContractService,
     private toastr: ToastrService,
     private cdr: ChangeDetectorRef,
+    private sanitizer: DomSanitizer,
   ) {}
+
   ngOnInit(): void {
     this.loadContracts();
   }
@@ -46,6 +54,61 @@ export class LandlordContractsComponent implements OnInit {
       },
     });
   }
+
+  openUploadedContractPreview(contract: any): void {
+    if (!contract.contractFileUrl) {
+      this.toastr.warning('Hợp đồng này chưa có file upload');
+      return;
+    }
+
+    this.previewTitle = contract.contractCode
+      ? `Hợp đồng #${contract.contractCode}`
+      : 'Xem hợp đồng upload';
+    this.previewUrl = contract.contractFileUrl;
+    this.previewType = this.detectPreviewType(contract.contractFileUrl);
+    if (this.previewType === 'image' || this.previewType === 'pdf') {
+      this.safePreviewUrl = this.sanitizer.bypassSecurityTrustResourceUrl(contract.contractFileUrl);
+    } else if (this.previewType === 'office') {
+      const viewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(contract.contractFileUrl)}`;
+      this.safePreviewUrl = this.sanitizer.bypassSecurityTrustResourceUrl(viewerUrl);
+    } else {
+      this.safePreviewUrl = null;
+    }
+
+    this.previewModalOpen = true;
+  }
+
+  detectPreviewType(fileUrl: string): 'image' | 'pdf' | 'office' | 'unsupported' {
+    const cleanUrl = fileUrl.split('?')[0].toLowerCase();
+    const extension = cleanUrl.substring(cleanUrl.lastIndexOf('.') + 1);
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(extension)) {
+      return 'image';
+    }
+    if (extension === 'pdf') {
+      return 'pdf';
+    }
+    if (['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(extension)) {
+      return 'office';
+    }
+    return 'unsupported';
+  }
+
+  downloadUploadedContract(contract: any): void {
+    if (!contract.contractFileUrl) {
+      this.toastr.warning('Hợp đồng này chưa có file upload');
+      return;
+    }
+    window.open(contract.contractFileUrl, '_blank', 'noopener');
+  }
+
+  closePreviewModal(): void {
+    this.previewModalOpen = false;
+    this.previewTitle = '';
+    this.previewType = 'unsupported';
+    this.previewUrl = '';
+    this.safePreviewUrl = null;
+  }
+
   onFilterChange() {
     this.filter.page = 0;
     this.loadContracts();

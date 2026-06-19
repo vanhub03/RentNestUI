@@ -87,29 +87,26 @@
                   >
                     <i class="fas fa-eye"></i>
                   </a>
-                  <a
+                  <button
                     *ngIf="!contract.rentalRequestId && contract.contractFileUrl"
                     class="btn btn-sm btn-outline"
-                    [href]="contract.contractFileUrl"
-                    target="_blank"
-                    rel="noopener"
+                    type="button"
+                    (click)="openUploadedContractPreview(contract)"
                     title="Xem file hợp đồng"
                   >
                     <i class="fas fa-eye"></i>
-                  </a>
-                  <a
+                  </button>
+                  <button
                     *ngIf="contract.contractFileUrl"
                     class="btn btn-sm btn-outline"
-                    [href]="contract.contractFileUrl"
-                    target="_blank"
-                    rel="noopener"
-                    download
+                    type="button"
+                    (click)="downloadUploadedContract(contract)"
                     title="Mở file hợp đồng"
                   >
                     <i class="fas fa-file-pdf text-danger"></i>
-                  </a>
+                  </button>
                   <button
-                    *ngIf="contract.expiringSoon || contract.status === 'EXPIRED'"
+                    *ngIf="contract.expiringSoon"
                     class="btn btn-sm btn-outline"
                     title="Gia hạn hợp đồng"
                     (click)="renewContract(contract)"
@@ -143,6 +140,50 @@
           </a>
         </li>
       </ul>
+    </div>
+  </div>
+
+  <div class="contract-preview-backdrop" *ngIf="previewModalOpen" (click)="closePreviewModal()">
+    <div class="contract-preview-modal" (click)="$event.stopPropagation()">
+      <div class="contract-preview-header">
+        <div>
+          <h3 class="m-0">{{ previewTitle }}</h3>
+          <!-- <p class="text-muted text-sm m-0 mt-1">
+            File landlord upload: PDF/anh xem truc tiep, Word/Excel/PowerPoint xem qua Office
+            viewer.
+          </p> -->
+        </div>
+        <button class="btn btn-sm btn-outline" type="button" (click)="closePreviewModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="contract-preview-body">
+        <img
+          *ngIf="previewType === 'image'"
+          class="contract-preview-image"
+          [src]="previewUrl"
+          alt="File hop dong upload"
+        />
+
+        <iframe
+          *ngIf="previewType === 'pdf' || previewType === 'office'"
+          class="contract-preview-frame"
+          [src]="safePreviewUrl"
+          title="Xem hop dong upload"
+        ></iframe>
+
+        <div *ngIf="previewType === 'unsupported'" class="unsupported-preview">
+          <i class="fas fa-file-alt"></i>
+          <h4>Khong xem truoc duoc dinh dang file nay</h4>
+          <p class="text-muted">
+            He thong chua ho tro preview dinh dang nay. Ban van co the mo hoac tai file goc.
+          </p>
+          <a class="btn btn-primary" [href]="previewUrl" target="_blank" rel="noopener">
+            Mo file goc
+          </a>
+        </div>
+      </div>
     </div>
   </div>
 </div>
